@@ -33,14 +33,17 @@ A modern, full-stack website for the **Begum Rokeya University Debate Forum (BRU
 - **CSV Export** - Download member lists in CSV format
 - **Health Check Endpoint** - Server status monitoring
 - **CORS Support** - Cross-origin resource sharing enabled
-- **In-Memory Storage** - Simple, deployment-ready storage solution
+- **SQLite Database** - Persistent storage with automatic data retention
+- **Email Validation** - Duplicate email prevention with unique constraints
+- **Data Persistence** - Member data survives server restarts
 
 ### 🚀 Technical Stack
 
 - **Frontend**: React 18, Vite, Tailwind CSS, PostCSS
 - **Backend**: Node.js, Express.js, CORS middleware
+- **Database**: SQLite with persistent file storage
 - **Deployment**: Render (full-stack deployment with render.yaml)
-- **Storage**: In-memory (production-ready, can be upgraded to database)
+- **Storage**: SQLite database with automatic data retention
 - **Authentication**: Password-based admin system
 - **Build Tools**: Vite for frontend, Express for backend serving
 
@@ -84,6 +87,7 @@ Before you begin, ensure you have the following installed:
 
    ```bash
    # Build the frontend first
+   cd /Users/rishad/React/clubsitev2 && lsof -ti:3001 | xargs kill -9
    npm run build
 
    # Start the full-stack server (backend + frontend)
@@ -240,7 +244,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: ADMIN_PASSWORD
-        value: brudf2024admin
+        value: admin
 ```
 
 ### 🌐 Post-Deployment
@@ -254,7 +258,7 @@ services:
 
    - **Public Registration**: Fill out and submit membership forms
    - **Admin Panel**: Use `Ctrl+Shift+A` or footer "Admin" button
-   - **Admin Login**: Use password `brudf2024admin`
+   - **Admin Login**: Use password `admin`
    - **Member Management**: View, delete, and export member data
 
 3. **Monitor Deployment**:
@@ -1058,7 +1062,7 @@ curl -X POST http://localhost:3001/api/members \
   -d '{"name":"Test User","email":"test@example.com"}'
 
 # Test admin access
-curl "http://localhost:3001/api/members?password=brudf2024admin"
+curl "http://localhost:3001/api/members?password=admin"
 ```
 
 **✅ Admin Panel**

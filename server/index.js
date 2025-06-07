@@ -3,6 +3,13 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
+import {
+  initDatabase,
+  addMember,
+  getAllMembers,
+  deleteMember,
+  closeDatabase,
+} from "./database.js";
 
 dotenv.config();
 
@@ -12,86 +19,157 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001; // Changed from 5000 to 3001 to avoid conflicts
 
-// In-memory storage (for simplicity - in production, use a proper database)
-let members = [];
-let nextId = 1;
+// Initialize database on startup
+let dbInitialized = false;
+
+async function setupDatabase() {
+  try {
+    await initDatabase();
+    dbInitialized = true;
+    console.log("✅ Database initialized successfully");
+  } catch (error) {
+    console.error("❌ Failed to initialize database:", error);
+    process.exit(1);
+  }
+}
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the public directory (for images)
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Serve static files from the React app build
 app.use(express.static(path.join(__dirname, "../dist")));
 
 // API Routes
 // Submit membership form
-app.post("/api/members", (req, res) => {
+app.post("/api/members", async (req, res) => {
   try {
+    if (!dbInitialized) {
+      return res.status(500).json({
+        success: false,
+        message: "Database not initialized",
+      });
+    }
+
     const memberData = {
-      id: nextId++,
-      ...req.body,
-      submittedAt: new Date().toISOString(),
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      bloodGroup: req.body.bloodGroup,
+      department: req.body.department,
+      year: req.body.year,
+      motivation: req.body.motivation,
+      experience: req.body.experience,
+      interests: req.body.interests || [],
     };
 
-    members.push(memberData);
+    const newMember = await addMember(memberData);
 
     res.status(201).json({
       success: true,
       message: "Membership application submitted successfully",
-      id: memberData.id,
+      id: newMember.id,
     });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to submit application",
-    });
+    if (error.message === "A member with this email already exists") {
+      res.status(400).json({
+        success: false,
+        message: "A member with this email already exists",
+      });
+    } else {
+      console.error("Error adding member:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to submit application",
+      });
+    }
   }
 });
 
 // Get all members (admin only - simple password protection)
-app.get("/api/members", (req, res) => {
-  const { password } = req.query;
+app.get("/api/members", async (req, res) => {
+  try {
+    const { password } = req.query;
 
-  // Simple password protection (in production, use proper authentication)
-  if (
-    password !== process.env.ADMIN_PASSWORD &&
-    password !== "brudf2024admin"
-  ) {
-    return res.status(401).json({
+    // Simple password protection (in production, use proper authentication)
+    if (
+      password !== process.env.ADMIN_PASSWORD &&
+      password !== "brudf2024admin"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    if (!dbInitialized) {
+      return res.status(500).json({
+        success: false,
+        message: "Database not initialized",
+      });
+    }
+
+    const members = await getAllMembers();
+
+    res.json({
+      success: true,
+      members: members,
+    });
+  } catch (error) {
+    console.error("Error getting members:", error);
+    res.status(500).json({
       success: false,
-      message: "Unauthorized access",
+      message: "Failed to retrieve members",
     });
   }
-
-  res.json({
-    success: true,
-    members: members.sort(
-      (a, b) => new Date(b.submittedAt) - new Date(a.submittedAt)
-    ),
-  });
 });
 
 // Delete member (admin only)
-app.delete("/api/members/:id", (req, res) => {
-  const { password } = req.query;
-  const { id } = req.params;
+app.delete("/api/members/:id", async (req, res) => {
+  try {
+    const { password } = req.query;
+    const { id } = req.params;
 
-  if (
-    password !== process.env.ADMIN_PASSWORD &&
-    password !== "brudf2024admin"
-  ) {
-    return res.status(401).json({
+    if (
+      password !== process.env.ADMIN_PASSWORD &&
+      password !== "brudf2024admin"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    if (!dbInitialized) {
+      return res.status(500).json({
+        success: false,
+        message: "Database not initialized",
+      });
+    }
+
+    const deleted = await deleteMember(parseInt(id));
+
+    if (deleted) {
+      res.json({
+        success: true,
+        message: "Member deleted successfully",
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        message: "Member not found",
+      });
+    }
+  } catch (error) {
+    console.error("Error deleting member:", error);
+    res.status(500).json({
       success: false,
-      message: "Unauthorized access",
+      message: "Failed to delete member",
     });
   }
-
-  members = members.filter((member) => member.id !== parseInt(id));
-
-  res.json({
-    success: true,
-    message: "Member deleted successfully",
-  });
 });
 
 // Health check
@@ -104,20 +182,50 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📱 Frontend: http://localhost:${PORT}`);
-  console.log(`🔧 Admin Panel: Ctrl+Shift+A or click "Admin" in footer`);
-  console.log(`🔑 Admin Password: brudf2024admin`);
-});
+// Initialize database and start server
+async function startServer() {
+  await setupDatabase();
 
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.log(
-      `❌ Port ${PORT} is already in use. Trying port ${PORT + 1}...`
-    );
-    server.listen(PORT + 1);
-  } else {
-    console.error("❌ Server error:", err);
-  }
+  const server = app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📱 Frontend: http://localhost:${PORT}`);
+    console.log(`🔧 Admin Panel: Ctrl+Shift+A or click "Admin" in footer`);
+    console.log(`🔑 Admin Password: brudf2024admin`);
+    console.log(`💾 Database: SQLite (persistent storage enabled)`);
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.log(
+        `❌ Port ${PORT} is already in use. Trying port ${PORT + 1}...`
+      );
+      server.listen(PORT + 1);
+    } else {
+      console.error("❌ Server error:", err);
+    }
+  });
+
+  // Graceful shutdown
+  process.on("SIGTERM", async () => {
+    console.log("🔄 Received SIGTERM, shutting down gracefully...");
+    await closeDatabase();
+    server.close(() => {
+      console.log("✅ Server closed");
+      process.exit(0);
+    });
+  });
+
+  process.on("SIGINT", async () => {
+    console.log("🔄 Received SIGINT, shutting down gracefully...");
+    await closeDatabase();
+    server.close(() => {
+      console.log("✅ Server closed");
+      process.exit(0);
+    });
+  });
+}
+
+startServer().catch((error) => {
+  console.error("❌ Failed to start server:", error);
+  process.exit(1);
 });
