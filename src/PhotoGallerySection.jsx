@@ -10,6 +10,9 @@ import React, {
 const generateGalleryImages = () => {
   const galleryFiles = [
     "184758830_5423702137703826_1510497708541038876_n.jpg",
+    "peash2 session.jpg",
+    "peash3 family.jpg",
+    "peash1.jpg",
     "308316172_1122511035042391_1648263047600251538_n.jpg",
     "309303886_1410247022795058_163559712217788494_n.jpg",
     "46836871_2300870776653660_1937278688584269824_n.jpg",
@@ -105,7 +108,8 @@ const generateGalleryImages = () => {
     if (
       name.includes("iftar") ||
       name.includes("party") ||
-      name.includes("congo")
+      name.includes("congo") ||
+      name.includes("family")
     )
       return "social";
     return "events"; // Default category

@@ -44,6 +44,152 @@ Before you begin, ensure you have the following installed:
 - **Git** for cloning the repository
 - A modern web browser (Chrome, Firefox, Safari, Edge)
 
+### 🔧 Node.js Installation Guide
+
+If you don't have Node.js installed, follow these steps:
+
+#### Windows
+
+1. **Download Node.js**:
+   - Visit [nodejs.org](https://nodejs.org/)
+   - Download the **LTS (Long Term Support)** version
+   - Run the `.msi` installer file
+
+2. **Verify Installation**:
+   ```bash
+   # Open Command Prompt or PowerShell
+   node --version
+   npm --version
+   ```
+
+3. **Alternative - Using Chocolatey**:
+   ```bash
+   # Install Chocolatey first, then:
+   choco install nodejs
+   ```
+
+#### macOS
+
+1. **Download Node.js**:
+   - Visit [nodejs.org](https://nodejs.org/)
+   - Download the **LTS** version
+   - Run the `.pkg` installer file
+
+2. **Alternative - Using Homebrew**:
+   ```bash
+   # Install Homebrew first, then:
+   brew install node
+   ```
+
+3. **Alternative - Using MacPorts**:
+   ```bash
+   sudo port install nodejs18 +universal
+   ```
+
+4. **Verify Installation**:
+   ```bash
+   node --version
+   npm --version
+   ```
+
+#### Linux (Ubuntu/Debian)
+
+1. **Using Package Manager**:
+   ```bash
+   # Update package index
+   sudo apt update
+   
+   # Install Node.js and npm
+   sudo apt install nodejs npm
+   
+   # Verify installation
+   node --version
+   npm --version
+   ```
+
+2. **Using NodeSource Repository** (Recommended):
+   ```bash
+   # Add NodeSource repository
+   curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+   
+   # Install Node.js
+   sudo apt-get install -y nodejs
+   ```
+
+#### Linux (CentOS/RHEL/Fedora)
+
+```bash
+# For CentOS/RHEL
+sudo yum install nodejs npm
+
+# For Fedora
+sudo dnf install nodejs npm
+
+# Verify installation
+node --version
+npm --version
+```
+
+#### Using Node Version Manager (NVM) - Recommended for Developers
+
+NVM allows you to install and switch between multiple Node.js versions:
+
+1. **Install NVM**:
+   ```bash
+   # macOS/Linux
+   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+   
+   # Restart terminal or run:
+   source ~/.bashrc
+   ```
+
+2. **Install Latest LTS Node.js**:
+   ```bash
+   nvm install --lts
+   nvm use --lts
+   nvm alias default lts/*
+   ```
+
+3. **Verify Installation**:
+   ```bash
+   node --version
+   npm --version
+   ```
+
+#### Troubleshooting Node.js Installation
+
+**Permission Issues on macOS/Linux**:
+```bash
+# Fix npm permissions
+sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
+```
+
+**Windows Path Issues**:
+```bash
+# Add Node.js to PATH manually if needed
+# Add: C:\Program Files\nodejs\ to your PATH environment variable
+```
+
+**Version Conflicts**:
+```bash
+# Check installed versions
+node --version
+npm --version
+
+# Update npm to latest
+npm install -g npm@latest
+```
+
+### 📊 Node.js Version Compatibility
+
+| Node.js Version | npm Version | Status | Recommended |
+|----------------|-------------|---------|-------------|
+| 18.x.x         | 9.x.x       | ✅ LTS  | ✅ Yes      |
+| 16.x.x         | 8.x.x       | ✅ LTS  | ✅ Yes      |
+| 14.x.x         | 6.x.x       | ⚠️ End of Life | ❌ No       |
+
+**Recommended**: Use Node.js 18.x (LTS) for best compatibility and performance.
+
 ### 📦 Dependencies
 
 This project uses the following key dependencies:
@@ -63,7 +209,7 @@ This project uses the following key dependencies:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/clubsitev2.git
+git clone https://github.com/Rishad-007/clubsitev2.git
 
 # Navigate to project directory
 cd clubsitev2
@@ -86,7 +232,7 @@ npm run preview
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/clubsitev2.git
+git clone https://github.com/Rishad-007/clubsitev2.git
 cd clubsitev2
 ```
 
@@ -515,17 +661,25 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Facebook**: [BRUDF Official Page](https://www.facebook.com/brudf.2016)
 - **University**: Begum Rokeya University, Rangpur
 
+### Developer Contact
+
+- **Name**: Rishad Nur
+- **Email**: [rishad.nur007@gmail.com](mailto:rishad.nur007@gmail.com)
+- **Facebook**: [fb.com/rishad.nur](https://fb.com/rishad.nur)
+- **GitHub**: [github.com/Rishad-007](https://github.com/Rishad-007)
+
 ### Technical Support
 
 For technical issues with the website:
 
-1. **Check the Issues**: Look at [GitHub Issues](https://github.com/YOUR_USERNAME/clubsitev2/issues)
+1. **Check the Issues**: Look at [GitHub Issues](https://github.com/Rishad-007/clubsitev2/issues)
 2. **Create New Issue**: If your problem isn't listed, create a new issue
-3. **Community Help**: Ask in discussions or reach out to maintainers
+3. **Direct Contact**: Email [rishad.nur007@gmail.com](mailto:rishad.nur007@gmail.com) for urgent technical issues
+4. **Community Help**: Ask in discussions or reach out to maintainers
 
 ### Project Maintainers
 
-- **Lead Developer**: [Your Name](https://github.com/YOUR_USERNAME)
+- **Lead Developer**: [Rishad Nur](https://github.com/Rishad-007)
 - **BRUDF Committee**: [Committee Members](https://www.facebook.com/brudf.2016)
 
 ## 🚀 Future Enhancements
@@ -575,8 +729,8 @@ We're looking for help with:
 
 **Made with ❤️ for the BRUDF Community**
 
-[🌟 Star this repo](https://github.com/YOUR_USERNAME/clubsitev2) if you found it helpful!
+[🌟 Star this repo](https://github.com/Rishad-007/clubsitev2) if you found it helpful!
 
-[📝 Report Issues](https://github.com/YOUR_USERNAME/clubsitev2/issues) • [💡 Request Features](https://github.com/YOUR_USERNAME/clubsitev2/issues) • [🤝 Contribute](https://github.com/YOUR_USERNAME/clubsitev2/pulls)
+[📝 Report Issues](https://github.com/Rishad-007/clubsitev2/issues) • [💡 Request Features](https://github.com/Rishad-007/clubsitev2/issues) • [🤝 Contribute](https://github.com/Rishad-007/clubsitev2/pulls)
 
 </div>
