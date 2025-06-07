@@ -5,7 +5,7 @@ const MembershipForm = ({ isOpen, onClose }) => {
     name: "",
     email: "",
     phone: "",
-    studentId: "",
+    bloodGroup: "",
     department: "",
     year: "",
     motivation: "",
@@ -37,28 +37,45 @@ const MembershipForm = ({ isOpen, onClose }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-
-    // Auto close after success
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        studentId: "",
-        department: "",
-        year: "",
-        motivation: "",
-        experience: "",
-        interests: [],
+    try {
+      const response = await fetch("/api/members", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
-      onClose();
-    }, 3000);
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsSubmitted(true);
+
+        // Auto close after success
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({
+            name: "",
+            email: "",
+            phone: "",
+            bloodGroup: "",
+            department: "",
+            year: "",
+            motivation: "",
+            experience: "",
+            interests: [],
+          });
+          onClose();
+        }, 3000);
+      } else {
+        throw new Error(result.message || "Failed to submit application");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("Failed to submit application. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const interests = [
@@ -160,136 +177,159 @@ const MembershipForm = ({ isOpen, onClose }) => {
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
                 /* Personal Information */
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Full Name *
-                          </label>
-                          <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
-                            placeholder="Enter your full name"
-                          />
-                          </div>
-                          <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Email Address *
-                          </label>
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
-                            placeholder="your.email@example.com"
-                          />
-                          </div>
-                        </div>
-
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Phone Number *
-                          </label>
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
-                            placeholder="+880 1XXXXXXXXX"
-                          />
-                          </div>
-                          <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Blood Group *
-                          </label>
-                          <select
-                            name="studentId"
-                            value={formData.studentId}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
-                          >
-                            <option value="">Select your blood group</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                          </select>
-                          </div>
-                        </div>
-
-                        {/* Academic Information */}
-                        <div className="grid md:grid-cols-2 gap-6">
-                          <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Department *
-                          </label>
-                          <select
-                            name="department"
-                            value={formData.department}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
-                          >
-                            <option value="">Select your department</option>
-                            <option value="Bangla">Bangla</option>
-                            <option value="English">English</option>
-                            <option value="History and Archaeology">History and Archaeology</option>
-                            <option value="Economics">Economics</option>
-                            <option value="Sociology">Sociology</option>
-                            <option value="Political Science">Political Science</option>
-                            <option value="Gender and Development Studies">Gender and Development Studies</option>
-                            <option value="Mass Communication and Journalism">Mass Communication and Journalism</option>
-                            <option value="Public Administration">Public Administration</option>
-                            <option value="Accounting and Information Systems">Accounting and Information Systems</option>
-                            <option value="Management Studies">Management Studies</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Finance and Banking">Finance and Banking</option>
-                            <option value="Management Information Systems">Management Information Systems</option>
-                            <option value="Mathematics">Mathematics</option>
-                            <option value="Statistics">Statistics</option>
-                            <option value="Physics">Physics</option>
-                            <option value="Chemistry">Chemistry</option>
-                            <option value="Computer Science and Engineering">Computer Science and Engineering</option>
-                            <option value="Electrical and Electronic Engineering">Electrical and Electronic Engineering</option>
-                            <option value="Geography and Environmental Science">Geography and Environmental Science</option>
-                            <option value="Disaster Management">Disaster Management</option>
-                          </select>
-                          </div>
-                          <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Academic Year *
-                          </label>
-                          <select
-                            name="year"
-                            value={formData.year}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
-                          >
-                            <option value="">Select your year</option>
-                            <option value="1st Year">1st Year</option>
-                            <option value="2nd Year">2nd Year</option>
-                            <option value="3rd Year">3rd Year</option>
-                            <option value="4th Year">4th Year</option>
-                            <option value="Masters">Masters</option>
-                          </select>
-                          </div>
-                        </div>
-
-                        {/* Interests */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                      placeholder="your.email@example.com"
+                    />
+                  </div>
+                </div>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone Number *
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                      placeholder="+880 1XXXXXXXXX"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Blood Group *
+                    </label>
+                    <select
+                      name="bloodGroup"
+                      value={formData.bloodGroup}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select your blood group</option>
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+                </div>
+                {/* Academic Information */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Department *
+                    </label>
+                    <select
+                      name="department"
+                      value={formData.department}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select your department</option>
+                      <option value="Bangla">Bangla</option>
+                      <option value="English">English</option>
+                      <option value="History and Archaeology">
+                        History and Archaeology
+                      </option>
+                      <option value="Economics">Economics</option>
+                      <option value="Sociology">Sociology</option>
+                      <option value="Political Science">
+                        Political Science
+                      </option>
+                      <option value="Gender and Development Studies">
+                        Gender and Development Studies
+                      </option>
+                      <option value="Mass Communication and Journalism">
+                        Mass Communication and Journalism
+                      </option>
+                      <option value="Public Administration">
+                        Public Administration
+                      </option>
+                      <option value="Accounting and Information Systems">
+                        Accounting and Information Systems
+                      </option>
+                      <option value="Management Studies">
+                        Management Studies
+                      </option>
+                      <option value="Marketing">Marketing</option>
+                      <option value="Finance and Banking">
+                        Finance and Banking
+                      </option>
+                      <option value="Management Information Systems">
+                        Management Information Systems
+                      </option>
+                      <option value="Mathematics">Mathematics</option>
+                      <option value="Statistics">Statistics</option>
+                      <option value="Physics">Physics</option>
+                      <option value="Chemistry">Chemistry</option>
+                      <option value="Computer Science and Engineering">
+                        Computer Science and Engineering
+                      </option>
+                      <option value="Electrical and Electronic Engineering">
+                        Electrical and Electronic Engineering
+                      </option>
+                      <option value="Geography and Environmental Science">
+                        Geography and Environmental Science
+                      </option>
+                      <option value="Disaster Management">
+                        Disaster Management
+                      </option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Academic Year *
+                    </label>
+                    <select
+                      name="year"
+                      value={formData.year}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                    >
+                      <option value="">Select your year</option>
+                      <option value="1st Year">1st Year</option>
+                      <option value="2nd Year">2nd Year</option>
+                      <option value="3rd Year">3rd Year</option>
+                      <option value="4th Year">4th Year</option>
+                      <option value="Masters">Masters</option>
+                    </select>
+                  </div>
+                </div>
+                {/* Interests */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Areas of Interest (Select all that apply)
@@ -328,7 +368,6 @@ const MembershipForm = ({ isOpen, onClose }) => {
                     ))}
                   </div>
                 </div>
-
                 {/* Motivation */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -344,7 +383,6 @@ const MembershipForm = ({ isOpen, onClose }) => {
                     placeholder="Share your motivation for joining our debate forum..."
                   />
                 </div>
-
                 {/* Experience */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -359,7 +397,6 @@ const MembershipForm = ({ isOpen, onClose }) => {
                     placeholder="Tell us about any previous experience in debating, public speaking, or related activities..."
                   />
                 </div>
-
                 {/* Submit Button */}
                 <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
                   <button

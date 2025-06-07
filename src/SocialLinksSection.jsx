@@ -51,147 +51,158 @@ const socialLinks = [
   },
 ];
 
-const SocialLinksSection = () => (
-  <footer className="relative py-16 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white overflow-hidden">
-    {/* Background decorative elements */}
-    <div className="absolute inset-0 opacity-10">
-      <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
-    </div>
-
-    <div className="relative z-10 max-w-7xl mx-auto px-6">
-      {/* Section header */}
-      <div className="text-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent mb-4">
-          Connect with BRUDF
-        </h2>
-        <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-          Join our vibrant community across all social platforms and stay
-          connected with the latest updates
-        </p>
-        <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-500 mx-auto mt-6 rounded-full"></div>
+const SocialLinksSection = ({ onAdminClick }) => {
+  return (
+    <footer className="relative py-16 bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 text-white overflow-hidden">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl"></div>
       </div>
 
-      {/* Social links grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-        {socialLinks.map((link, idx) => (
-          <a
-            key={idx}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transform hover:-translate-y-2 transition-all duration-300"
-          >
-            {/* Icon container */}
-            <div
-              className={`w-16 h-16 bg-gradient-to-r ${link.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        {/* Section header */}
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-indigo-300 to-purple-300 bg-clip-text text-transparent mb-4">
+            Connect with BRUDF
+          </h2>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Join our vibrant community across all social platforms and stay
+            connected with the latest updates
+          </p>
+          <div className="w-24 h-1 bg-gradient-to-r from-indigo-400 to-purple-500 mx-auto mt-6 rounded-full"></div>
+        </div>
+
+        {/* Social links grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+          {socialLinks.map((link, idx) => (
+            <a
+              key={idx}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transform hover:-translate-y-2 transition-all duration-300"
             >
-              {link.icon}
-            </div>
+              {/* Icon container */}
+              <div
+                className={`w-16 h-16 bg-gradient-to-r ${link.color} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}
+              >
+                {link.icon}
+              </div>
 
-            {/* Content */}
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors duration-300">
-              {link.name}
-            </h3>
+              {/* Content */}
+              <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-300 transition-colors duration-300">
+                {link.name}
+              </h3>
 
-            <p className="text-gray-300 text-sm mb-3 leading-relaxed">
-              {link.description}
+              <p className="text-gray-300 text-sm mb-3 leading-relaxed">
+                {link.description}
+              </p>
+
+              <div className="flex items-center justify-between">
+                <span className="text-indigo-300 font-semibold text-sm">
+                  {link.followers} members
+                </span>
+
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <svg
+                    className="w-5 h-5 text-indigo-300"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Hover overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            </a>
+          ))}
+        </div>
+
+        {/* Newsletter subscription */}
+        <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 mb-12">
+          <div className="text-center">
+            <h3 className="text-2xl font-bold text-white mb-4">Stay Updated</h3>
+            <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+              Subscribe to our newsletter and never miss important
+              announcements, event updates, and debate opportunities.
             </p>
 
-            <div className="flex items-center justify-between">
-              <span className="text-indigo-300 font-semibold text-sm">
-                {link.followers} members
-              </span>
+            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-4 py-3 rounded-full bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent backdrop-blur-sm"
+              />
+              <button className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-full hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+                Subscribe
+              </button>
+            </div>
+          </div>
+        </div>
 
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <svg
-                  className="w-5 h-5 text-indigo-300"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                  />
-                </svg>
+        {/* Footer bottom */}
+        <div className="border-t border-white/20 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-4">
+              <img
+                src="/logo brudf.png"
+                alt="BRUDF Logo"
+                className="w-12 h-12"
+              />
+              <div>
+                <h4 className="font-bold text-white">
+                  Begum Rokeya University Debate Forum (BRUDF)
+                </h4>
+                <p className="text-gray-300 text-sm">যুক্তি সততা মুক্তি</p>
               </div>
             </div>
 
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </a>
-        ))}
-      </div>
-
-      {/* Newsletter subscription */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20 mb-12">
-        <div className="text-center">
-          <h3 className="text-2xl font-bold text-white mb-4">Stay Updated</h3>
-          <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
-            Subscribe to our newsletter and never miss important announcements,
-            event updates, and debate opportunities.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-full bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent backdrop-blur-sm"
-            />
-            <button className="px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold rounded-full hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
-              Subscribe
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer bottom */}
-      <div className="border-t border-white/20 pt-8">
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <img src="/logo brudf.png" alt="BRUDF Logo" className="w-12 h-12" />
-            <div>
-              <h4 className="font-bold text-white">
-                Begum Rokeya University Debate Forum (BRUDF)
-              </h4>
-              <p className="text-gray-300 text-sm">
-                যুক্তি সততা মুক্তি
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-6 text-sm text-gray-300">
-            <span>© 2025 BRUDF. All rights reserved.</span>
-            <div className="flex gap-4">
-              <a
-                href="#"
-                className="hover:text-indigo-300 transition-colors duration-200"
-              >
-                Developed by Rishad Nur
-              </a>
-              <a
-                href="#"
-                className="hover:text-indigo-300 transition-colors duration-200"
-              >
-                
-              </a>
-              <a
-                href="https://www.facebook.com/rishad.nur"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-indigo-300 transition-colors duration-200"
-              >
-                Contact Us
-              </a>
+            <div className="flex flex-col sm:flex-row items-center gap-6 text-sm text-gray-300">
+              <span>© 2025 BRUDF. All rights reserved.</span>
+              <div className="flex gap-4">
+                <a
+                  href="#"
+                  className="hover:text-indigo-300 transition-colors duration-200"
+                >
+                  Developed by Rishad Nur
+                </a>
+                <a
+                  href="#"
+                  className="hover:text-indigo-300 transition-colors duration-200"
+                ></a>
+                <a
+                  href="https://www.facebook.com/rishad.nur"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-indigo-300 transition-colors duration-200"
+                >
+                  Contact Us
+                </a>
+                {onAdminClick && (
+                  <button
+                    onClick={onAdminClick}
+                    className="text-xs text-gray-500 hover:text-gray-300 transition-colors duration-200"
+                    title="Admin Panel (Ctrl+Shift+A)"
+                  >
+                    Admin
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 export default SocialLinksSection;

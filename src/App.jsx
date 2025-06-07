@@ -9,12 +9,30 @@ import VideoSection from "./VideoSection";
 import PreviousEventsSection from "./PreviousEventsSection";
 import SocialLinksSection from "./SocialLinksSection";
 import MembershipForm from "./MembershipForm";
+import AdminPanel from "./AdminPanel";
 
 function App() {
   const [isMembershipFormOpen, setIsMembershipFormOpen] = useState(false);
+  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState(false);
 
   const openMembershipForm = () => setIsMembershipFormOpen(true);
   const closeMembershipForm = () => setIsMembershipFormOpen(false);
+
+  const openAdminPanel = () => setIsAdminPanelOpen(true);
+  const closeAdminPanel = () => setIsAdminPanelOpen(false);
+
+  // Admin panel shortcut: Ctrl+Shift+A or Cmd+Shift+A
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "A") {
+        e.preventDefault();
+        openAdminPanel();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="App">
@@ -41,13 +59,15 @@ function App() {
         <PreviousEventsSection />
       </div>
       <div id="contact">
-        <SocialLinksSection />
+        <SocialLinksSection onAdminClick={openAdminPanel} />
       </div>
 
       <MembershipForm
         isOpen={isMembershipFormOpen}
         onClose={closeMembershipForm}
       />
+
+      <AdminPanel isOpen={isAdminPanelOpen} onClose={closeAdminPanel} />
     </div>
   );
 }

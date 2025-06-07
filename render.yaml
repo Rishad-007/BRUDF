@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: brudf-website
+    env: node
+    buildCommand: npm run render-build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_PASSWORD
+        value: brudf2024admin
+    autoDeploy: true
