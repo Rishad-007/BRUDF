@@ -17,9 +17,10 @@ A modern, responsive website for the **Begum Rokeya University Debate Forum (BRU
 - **Executive Members Carousel** - Interactive slider showcasing 20+ committee members
 - **Moderators Section** - Faculty profiles with achievements and specializations
 - **Notice Board** - Cork board style with authentic bulletin aesthetics
-- **Photo Gallery** - Masonry layout with lightbox functionality
+- **Photo Gallery** - Masonry layout with manual "Load More Photos" button
 - **Membership Form** - Hidden modal form with validation
-- **Events Section** - Previous events showcase
+- **Events Section** - Previous events with direct links to Facebook events
+- **Video Section** - BRUDF promotional and event videos
 - **Social Links** - Connect with BRUDF on social platforms
 
 ### 🚀 Technical Features
@@ -43,10 +44,10 @@ A modern, responsive website for the **Begum Rokeya University Debate Forum (BRU
 
 ```bash
 # Clone the repository
-git clone git@github.com:Rishad-007/Brudf_site_V2.git
+git clone [repository-url]
 
 # Navigate to project directory
-cd Brudf_site_V2/clubsitev2
+cd clubsitev2
 
 # Install dependencies
 npm install
