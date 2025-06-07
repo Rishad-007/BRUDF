@@ -74,7 +74,7 @@ Before you begin, ensure you have the following installed:
 
    ```env
    # Admin password for accessing member data
-   ADMIN_PASSWORD=brudf2024admin
+   ADMIN_PASSWORD=**********
 
    # Server port (Render will override this)
    PORT=3001
