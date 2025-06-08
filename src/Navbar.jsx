@@ -97,16 +97,16 @@ const Navbar = ({ onJoinClick }) => {
               />
               <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl blur opacity-25 group-hover:opacity-50 transition duration-300"></div>
             </div>
-            <div className="hidden md:block">
+            <div className="block">
               <h1
-                className={`text-xl font-bold ${
+                className={`text-lg md:text-xl font-bold ${
                   isScrolled ? "text-gray-800" : "text-white drop-shadow-lg"
                 } transition-colors duration-300`}
               >
                 BRUDF
               </h1>
               <p
-                className={`text-sm ${
+                className={`text-xs md:text-sm ${
                   isScrolled ? "text-gray-600" : "text-white/90"
                 } transition-colors duration-300`}
               >
