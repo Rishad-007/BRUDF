@@ -54,7 +54,12 @@ const Navbar = ({ onJoinClick }) => {
     { name: "Gallery", href: "#gallery", id: "gallery", icon: "📸" },
     { name: "Videos", href: "#videos", id: "videos", icon: "🎥" },
     { name: "Events", href: "#events", id: "events", icon: "🎪" },
-    { name: "Certificate", href: "#certificate-validation", id: "certificate-validation", icon: "🏆" },
+    {
+      name: "Certificate",
+      href: "#certificate-validation",
+      id: "certificate-validation",
+      icon: "🏆",
+    },
     { name: "Contact", href: "#contact", id: "contact", icon: "📧" },
   ];
 
@@ -208,7 +213,10 @@ const Navbar = ({ onJoinClick }) => {
         {isOpen && (
           <div className="lg:hidden fixed inset-0 top-20 z-40 bg-black/50 backdrop-blur-sm">
             {/* Mobile Menu Panel - 70% width from right side */}
-            <div className="absolute right-0 top-0 bg-white shadow-2xl w-[70%] flex flex-col" style={{ height: '85vh', minHeight: '600px' }}>
+            <div
+              className="absolute right-0 top-0 bg-white shadow-2xl w-[70%] flex flex-col"
+              style={{ height: "85vh", minHeight: "600px" }}
+            >
               {/* Mobile Header */}
               <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50 flex-shrink-0">
                 <div className="flex items-center space-x-3">

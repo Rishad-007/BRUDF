@@ -187,9 +187,12 @@ app.post("/api/validate-certificate", (req, res) => {
     }
 
     // Read the certificate validation file
-    const certificateFilePath = path.join(__dirname, "certificateValidation.txt");
+    const certificateFilePath = path.join(
+      __dirname,
+      "certificateValidation.txt"
+    );
     console.log("Looking for certificate file at:", certificateFilePath);
-    
+
     if (!fs.existsSync(certificateFilePath)) {
       console.log("Certificate file not found at:", certificateFilePath);
       return res.status(500).json({
@@ -200,12 +203,12 @@ app.post("/api/validate-certificate", (req, res) => {
 
     const fileContent = fs.readFileSync(certificateFilePath, "utf8");
     console.log("File content:", fileContent);
-    
+
     const validCertificates = fileContent
       .split("\n")
-      .map(code => code.trim())
-      .filter(code => code.length > 0);
-    
+      .map((code) => code.trim())
+      .filter((code) => code.length > 0);
+
     console.log("Valid certificates:", validCertificates);
     console.log("Looking for:", certificateCode.trim());
 
@@ -215,8 +218,8 @@ app.post("/api/validate-certificate", (req, res) => {
     res.json({
       success: true,
       valid: isValid,
-      message: isValid 
-        ? "Certificate is valid and verified!" 
+      message: isValid
+        ? "Certificate is valid and verified!"
         : "Certificate code not found. Please check your certificate code.",
     });
   } catch (error) {

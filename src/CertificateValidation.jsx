@@ -7,7 +7,7 @@ const CertificateValidation = () => {
 
   const handleValidation = async (e) => {
     e.preventDefault();
-    
+
     if (!certificateCode.trim()) {
       setValidationResult({
         success: false,
@@ -17,7 +17,7 @@ const CertificateValidation = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
       const response = await fetch("/api/validate-certificate", {
         method: "POST",
@@ -46,7 +46,10 @@ const CertificateValidation = () => {
   };
 
   return (
-    <section id="certificate-validation" className="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <section
+      id="certificate-validation"
+      className="py-20 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50"
+    >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16">
@@ -69,7 +72,8 @@ const CertificateValidation = () => {
             Certificate Validation
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Verify the authenticity of your BRUDF certificates by entering your unique certificate code below.
+            Verify the authenticity of your BRUDF certificates by entering your
+            unique certificate code below.
           </p>
         </div>
 
@@ -78,8 +82,8 @@ const CertificateValidation = () => {
           <div className="p-8 sm:p-12">
             <form onSubmit={handleValidation} className="space-y-6">
               <div>
-                <label 
-                  htmlFor="certificateCode" 
+                <label
+                  htmlFor="certificateCode"
                   className="block text-sm font-semibold text-gray-700 mb-3"
                 >
                   Certificate Code
@@ -203,7 +207,10 @@ const CertificateValidation = () => {
                           {validationResult.message}
                         </p>
                         <p className="text-sm text-green-600 mt-2">
-                          Certificate Code: <span className="font-mono font-bold">{certificateCode}</span>
+                          Certificate Code:{" "}
+                          <span className="font-mono font-bold">
+                            {certificateCode}
+                          </span>
                         </p>
                       </div>
                     </div>
@@ -234,7 +241,8 @@ const CertificateValidation = () => {
                           {validationResult.message}
                         </p>
                         <p className="text-sm text-red-600 mt-2">
-                          Please double-check your certificate code and try again.
+                          Please double-check your certificate code and try
+                          again.
                         </p>
                       </div>
                     </div>
@@ -261,11 +269,18 @@ const CertificateValidation = () => {
                 />
               </svg>
               <div>
-                <h4 className="font-semibold text-gray-900 mb-2">How to find your certificate code:</h4>
+                <h4 className="font-semibold text-gray-900 mb-2">
+                  How to find your certificate code:
+                </h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• Look for a unique code printed on your certificate</li>
-                  <li>• The code usually starts with "BRUDF" or "CERT" followed by numbers</li>
-                  <li>• If you can't find your code, contact us at admin@brudf.org</li>
+                  <li>
+                    • The code usually starts with "BRUDF" or "CERT" followed by
+                    numbers
+                  </li>
+                  <li>
+                    • If you can't find your code, contact us at admin@brudf.org
+                  </li>
                 </ul>
               </div>
             </div>
