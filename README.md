@@ -97,7 +97,7 @@ Before you begin, ensure you have the following installed:
 5. **Access the application**
    - **Website**: http://localhost:3001
    - **Admin Panel**: Press `Ctrl+Shift+A` or click "Admin" in footer
-   - **Admin Password**: `brudf2024admin`
+   - **Admin Password**: `admin`
    - **API Health Check**: http://localhost:3001/api/health
 
 ### 🔄 Development Workflow
@@ -138,7 +138,7 @@ For active development with hot reload:
 1. **Admin Access**:
    - Use keyboard shortcut: `Ctrl+Shift+A`
    - Or click "Admin" button in footer
-2. **Authentication**: Enter admin password (`brudf2024admin`)
+2. **Authentication**: Enter admin password (`admin`)
 3. **Member Management**:
    - View all registered members with full details
    - Delete members if needed
@@ -179,7 +179,7 @@ fetch("/api/members", {
 **Admin - Get All Members:**
 
 ```javascript
-fetch("/api/members?password=brudf2024admin")
+fetch("/api/members?password=admin")
   .then((response) => response.json())
   .then((members) => console.log(members));
 ```
@@ -187,7 +187,7 @@ fetch("/api/members?password=brudf2024admin")
 **Admin - Delete Member:**
 
 ```javascript
-fetch("/api/members/123?password=brudf2024admin", {
+fetch("/api/members/123?password=admin", {
   method: "DELETE",
 });
 ```
@@ -326,7 +326,7 @@ services:
 
 2. **Admin Authentication**:
 
-   - Enter admin password: `brudf2024admin`
+   - Enter admin password: `admin`
    - Access granted to full member management dashboard
 
 3. **Member Management Dashboard**:
@@ -368,7 +368,7 @@ Create a `.env` file in the root directory:
 
 ```env
 # Admin password for accessing member data
-ADMIN_PASSWORD=brudf2024admin
+ADMIN_PASSWORD=admin
 
 # Server port (Render will override this in production)
 PORT=3001
