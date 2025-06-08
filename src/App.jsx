@@ -7,6 +7,7 @@ import NoticeBoardSection from "./NoticeBoardSection";
 import PhotoGallerySection from "./PhotoGallerySection";
 import VideoSection from "./VideoSection";
 import PreviousEventsSection from "./PreviousEventsSection";
+import CertificateValidation from "./CertificateValidation";
 import SocialLinksSection from "./SocialLinksSection";
 import MembershipForm from "./MembershipForm";
 import AdminPanel from "./AdminPanel";
@@ -57,6 +58,9 @@ function App() {
       </div>
       <div id="events">
         <PreviousEventsSection />
+      </div>
+      <div id="certificate-validation">
+        <CertificateValidation />
       </div>
       <div id="contact">
         <SocialLinksSection onAdminClick={openAdminPanel} />

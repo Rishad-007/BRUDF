@@ -19,6 +19,7 @@ const Navbar = ({ onJoinClick }) => {
         "gallery",
         "videos",
         "events",
+        "certificate-validation",
         "contact",
       ];
       const sectionElements = sections.map((id) => document.getElementById(id));
@@ -53,6 +54,7 @@ const Navbar = ({ onJoinClick }) => {
     { name: "Gallery", href: "#gallery", id: "gallery", icon: "📸" },
     { name: "Videos", href: "#videos", id: "videos", icon: "🎥" },
     { name: "Events", href: "#events", id: "events", icon: "🎪" },
+    { name: "Certificate", href: "#certificate-validation", id: "certificate-validation", icon: "🏆" },
     { name: "Contact", href: "#contact", id: "contact", icon: "📧" },
   ];
 
@@ -108,7 +110,7 @@ const Navbar = ({ onJoinClick }) => {
           </div>
 
           {/* Enhanced Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-0.5">
             {navLinks.map((link, index) => (
               <a
                 key={index}
@@ -117,7 +119,7 @@ const Navbar = ({ onJoinClick }) => {
                   e.preventDefault();
                   handleNavClick(link.href);
                 }}
-                className={`group relative px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 ${
+                className={`group relative px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105 ${
                   activeSection === link.id
                     ? isScrolled
                       ? "text-amber-600 bg-amber-50"
@@ -127,8 +129,8 @@ const Navbar = ({ onJoinClick }) => {
                     : "text-white hover:text-yellow-300 hover:bg-white/10"
                 }`}
               >
-                <span className="flex items-center space-x-2">
-                  <span className="text-sm">{link.icon}</span>
+                <span className="flex items-center space-x-1.5">
+                  <span className="text-xs">{link.icon}</span>
                   <span>{link.name}</span>
                 </span>
                 {activeSection === link.id && (

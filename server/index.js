@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import {
@@ -172,9 +173,86 @@ app.delete("/api/members/:id", async (req, res) => {
   }
 });
 
+// Certificate validation endpoint
+app.post("/api/validate-certificate", (req, res) => {
+  try {
+    const { certificateCode } = req.body;
+    console.log("Certificate validation request received:", certificateCode);
+
+    if (!certificateCode) {
+      return res.status(400).json({
+        success: false,
+        message: "Certificate code is required",
+      });
+    }
+
+    // Read the certificate validation file
+    const certificateFilePath = path.join(__dirname, "certificateValidation.txt");
+    console.log("Looking for certificate file at:", certificateFilePath);
+    
+    if (!fs.existsSync(certificateFilePath)) {
+      console.log("Certificate file not found at:", certificateFilePath);
+      return res.status(500).json({
+        success: false,
+        message: "Certificate validation file not found",
+      });
+    }
+
+    const fileContent = fs.readFileSync(certificateFilePath, "utf8");
+    console.log("File content:", fileContent);
+    
+    const validCertificates = fileContent
+      .split("\n")
+      .map(code => code.trim())
+      .filter(code => code.length > 0);
+    
+    console.log("Valid certificates:", validCertificates);
+    console.log("Looking for:", certificateCode.trim());
+
+    const isValid = validCertificates.includes(certificateCode.trim());
+    console.log("Is valid:", isValid);
+
+    res.json({
+      success: true,
+      valid: isValid,
+      message: isValid 
+        ? "Certificate is valid and verified!" 
+        : "Certificate code not found. Please check your certificate code.",
+    });
+  } catch (error) {
+    console.error("Error validating certificate:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to validate certificate",
+    });
+  }
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+// Certificate validation endpoint
+app.post("/api/validate-certificate", (req, res) => {
+  const { certificate } = req.body;
+
+  // For simplicity, assume certificate is a plain text (in reality, it would be more complex)
+  if (!certificate) {
+    return res.status(400).json({
+      success: false,
+      message: "No certificate provided",
+    });
+  }
+
+  // Here, you would add logic to validate the certificate (e.g., check signature, expiration, etc.)
+  // For this example, let's assume all certificates are valid if not empty
+  const isValid = certificate.trim() !== "";
+
+  res.json({
+    success: true,
+    valid: isValid,
+  });
 });
 
 // Serve React app for all other routes
