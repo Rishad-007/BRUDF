@@ -204,11 +204,17 @@ const Navbar = ({ onJoinClick }) => {
 
         {/* Enhanced Mobile Navigation with Fixed Positioning */}
         {isOpen && (
-          <div className="lg:hidden fixed inset-0 top-20 z-40 bg-black/50 backdrop-blur-sm">
-            {/* Mobile Menu Panel - 70% width from right side */}
-            <div className="absolute right-0 top-0 bg-white shadow-2xl w-[70%] flex flex-col" style={{ height: '85vh', minHeight: '600px' }}>
+          <div className="lg:hidden fixed inset-0 top-20 z-40">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setIsOpen(false)}
+            />
+
+            {/* Mobile Menu Panel */}
+            <div className="relative bg-white shadow-2xl h-full overflow-hidden">
               {/* Mobile Header */}
-              <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50 flex-shrink-0">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-orange-50">
                 <div className="flex items-center space-x-3">
                   <img
                     src="/logo brudf.png"
@@ -240,10 +246,13 @@ const Navbar = ({ onJoinClick }) => {
                 </button>
               </div>
 
-              {/* Scrollable Navigation Content - Simplified */}
-              <div className="flex-1 overflow-y-auto p-4">
+              {/* Scrollable Navigation Content */}
+              <div
+                className="h-full overflow-y-auto pb-20"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
                 {/* Navigation Links */}
-                <div className="space-y-2 mb-6">
+                <div className="px-4 py-4 space-y-2">
                   {navLinks.map((link, index) => (
                     <a
                       key={index}
@@ -252,31 +261,109 @@ const Navbar = ({ onJoinClick }) => {
                         e.preventDefault();
                         handleNavClick(link.href);
                       }}
-                      className={`flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition-colors ${
+                      className={`group flex items-center space-x-4 px-4 py-4 rounded-2xl font-medium transition-all duration-300 transform hover:scale-[1.02] ${
                         activeSection === link.id
-                          ? "text-amber-700 bg-amber-50 border-l-4 border-amber-500"
-                          : "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
+                          ? "text-amber-700 bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-500 shadow-lg"
+                          : "text-gray-700 hover:text-amber-600 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50"
                       }`}
                     >
-                      <span className="text-lg">{link.icon}</span>
-                      <span className="font-semibold">{link.name}</span>
+                      <div
+                        className={`flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 ${
+                          activeSection === link.id
+                            ? "bg-amber-500 text-white shadow-lg"
+                            : "bg-gray-100 text-gray-600 group-hover:bg-amber-100 group-hover:text-amber-600"
+                        }`}
+                      >
+                        <span className="text-lg">{link.icon}</span>
+                      </div>
+                      <div className="flex-1">
+                        <span className="block font-semibold">{link.name}</span>
+                        {activeSection === link.id && (
+                          <span className="text-xs text-amber-600 font-medium">
+                            Currently viewing
+                          </span>
+                        )}
+                      </div>
+                      {activeSection === link.id && (
+                        <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                      )}
                     </a>
                   ))}
                 </div>
 
                 {/* Mobile CTA Section */}
-                <div className="pt-4 border-t border-gray-200">
+                <div className="px-4 pt-4 border-t border-gray-200 mt-4">
                   <button
                     onClick={() => {
                       onJoinClick();
                       setIsOpen(false);
                     }}
-                    className="w-full px-6 py-4 bg-gradient-to-r from-amber-500 to-red-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                    className="group flex items-center justify-center w-full px-6 py-4 bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
                   >
-                    <span className="flex items-center justify-center space-x-2">
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative z-10 flex items-center space-x-3">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                        />
+                      </svg>
                       <span>Join BRUDF Today</span>
-                    </span>
+                      <svg
+                        className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </div>
                   </button>
+
+                  {/* Social Links in Mobile */}
+                  <div className="flex items-center justify-center space-x-4 mt-6 pt-4 border-t border-gray-100">
+                    <p className="text-xs text-gray-500 font-medium">
+                      Follow us on:
+                    </p>
+                    <div className="flex space-x-3">
+                      <a
+                        href="#"
+                        className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform duration-200"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+                        </svg>
+                      </a>
+                      <a
+                        href="#"
+                        className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white hover:scale-110 transition-transform duration-200"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -15,6 +15,8 @@ const MembershipForm = ({ isOpen, onClose }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -22,6 +24,10 @@ const MembershipForm = ({ isOpen, onClose }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear errors when user starts typing
+    if (errorMessage) setErrorMessage("");
+    if (name === "email" && emailError) setEmailError("");
   };
 
   const handleInterestChange = (interest) => {
@@ -36,6 +42,8 @@ const MembershipForm = ({ isOpen, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage("");
+    setEmailError("");
 
     try {
       const response = await fetch("/api/members", {
@@ -68,11 +76,22 @@ const MembershipForm = ({ isOpen, onClose }) => {
           onClose();
         }, 3000);
       } else {
-        throw new Error(result.message || "Failed to submit application");
+        // Handle specific error cases
+        if (result.message && result.message.includes("email already exists")) {
+          setEmailError(
+            "This email is already registered. Please use a different email address."
+          );
+        } else {
+          setErrorMessage(
+            result.message || "Failed to submit application. Please try again."
+          );
+        }
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      alert("Failed to submit application. Please try again.");
+      setErrorMessage(
+        "Network error. Please check your connection and try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -176,7 +195,25 @@ const MembershipForm = ({ isOpen, onClose }) => {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
-                /* Personal Information */
+                {/* General Error Message */}
+                {errorMessage && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {errorMessage}
+                  </div>
+                )}
+
+                {/* Personal Information */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -202,9 +239,29 @@ const MembershipForm = ({ isOpen, onClose }) => {
                       value={formData.email}
                       onChange={handleInputChange}
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
+                      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200 ${
+                        emailError
+                          ? "border-red-500 bg-red-50"
+                          : "border-gray-300"
+                      }`}
                       placeholder="your.email@example.com"
                     />
+                    {emailError && (
+                      <p className="mt-2 text-sm text-red-600 flex items-center">
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        {emailError}
+                      </p>
+                    )}
                   </div>
                 </div>
                 <div className="grid md:grid-cols-2 gap-6">
@@ -311,7 +368,7 @@ const MembershipForm = ({ isOpen, onClose }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Academic Year *
+                      University Batch *
                     </label>
                     <select
                       name="year"
@@ -320,11 +377,12 @@ const MembershipForm = ({ isOpen, onClose }) => {
                       required
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent transition-all duration-200"
                     >
-                      <option value="">Select your year</option>
-                      <option value="1st Year">1st Year</option>
-                      <option value="2nd Year">2nd Year</option>
-                      <option value="3rd Year">3rd Year</option>
-                      <option value="4th Year">4th Year</option>
+                      <option value="">Select your batch</option>
+                      <option value="16th Batch">16th Batch</option>
+                      <option value="17th Batch">17th Batch</option>
+                      <option value="18th Batch">18th Batch</option>
+                      <option value="19th Batch">19th Batch</option>
+                      <option value="20th Batch">20th Batch</option>
                       <option value="Masters">Masters</option>
                     </select>
                   </div>

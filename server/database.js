@@ -102,7 +102,12 @@ async function addMember(memberData) {
 
     return newMember;
   } catch (error) {
-    if (error.code === "SQLITE_CONSTRAINT_UNIQUE") {
+    // Handle SQLite constraint errors
+    if (
+      error.code === "SQLITE_CONSTRAINT_UNIQUE" ||
+      error.message.includes("UNIQUE constraint failed") ||
+      error.message.includes("email")
+    ) {
       throw new Error("A member with this email already exists");
     }
     console.error("Error adding member:", error);

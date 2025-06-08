@@ -385,7 +385,7 @@ const VideoSection = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-violet-400 to-purple-500 rounded-2xl blur-xl opacity-30 scale-110"></div>
               <img
-                src="/public/win.jpg"
+                src="/win.jpg"
                 alt="BRUDF Community Moments"
                 className="relative w-full h-64 object-cover rounded-2xl shadow-2xl transform hover:scale-105 transition-transform duration-300"
               />
