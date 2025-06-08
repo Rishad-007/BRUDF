@@ -58,7 +58,8 @@ const Navbar = ({ onJoinClick }) => {
       name: "Certificate",
       href: "#certificate-validation",
       id: "certificate-validation",
-      icon: "🏆",
+      icon: "🎖️",
+      isSpecial: true, // Mark this as special for highlighting
     },
     { name: "Contact", href: "#contact", id: "contact", icon: "📧" },
   ];
@@ -125,21 +126,38 @@ const Navbar = ({ onJoinClick }) => {
                   handleNavClick(link.href);
                 }}
                 className={`group relative px-3 py-2 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105 ${
-                  activeSection === link.id
-                    ? isScrolled
-                      ? "text-amber-600 bg-amber-50"
-                      : "text-yellow-300 bg-white/20"
-                    : isScrolled
-                    ? "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
-                    : "text-white hover:text-yellow-300 hover:bg-white/10"
+                  link.isSpecial
+                    ? // Special styling for Certificate link
+                      activeSection === link.id
+                      ? isScrolled 
+                        ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg animate-pulse"
+                        : "text-white bg-gradient-to-r from-green-400 to-emerald-500 shadow-xl animate-pulse"
+                      : isScrolled
+                      ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
+                      : "text-white bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 shadow-lg hover:shadow-xl"
+                    : // Regular styling for other links
+                      activeSection === link.id
+                      ? isScrolled
+                        ? "text-amber-600 bg-amber-50"
+                        : "text-yellow-300 bg-white/20"
+                      : isScrolled
+                      ? "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
+                      : "text-white hover:text-yellow-300 hover:bg-white/10"
                 }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span className="text-xs">{link.icon}</span>
-                  <span>{link.name}</span>
+                  <span className={link.isSpecial ? "font-bold" : ""}>{link.name}</span>
+                  {link.isSpecial && (
+                    <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded-full text-xs font-bold animate-bounce">
+                      ✨
+                    </span>
+                  )}
                 </span>
                 {activeSection === link.id && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                  <div className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full animate-pulse ${
+                    link.isSpecial ? "bg-green-300" : "bg-amber-500"
+                  }`}></div>
                 )}
               </a>
             ))}
@@ -262,14 +280,30 @@ const Navbar = ({ onJoinClick }) => {
                         e.preventDefault();
                         handleNavClick(link.href);
                       }}
-                      className={`flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition-colors ${
-                        activeSection === link.id
-                          ? "text-amber-700 bg-amber-50 border-l-4 border-amber-500"
-                          : "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
+                      className={`flex items-center space-x-4 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                        link.isSpecial
+                          ? // Special styling for Certificate link
+                            activeSection === link.id
+                            ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 border-l-4 border-green-300 shadow-lg"
+                            : "text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-md hover:shadow-lg"
+                          : // Regular styling for other links  
+                            activeSection === link.id
+                            ? "text-amber-700 bg-amber-50 border-l-4 border-amber-500"
+                            : "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
                       }`}
                     >
                       <span className="text-lg">{link.icon}</span>
-                      <span className="font-semibold">{link.name}</span>
+                      <span className={`font-semibold ${link.isSpecial ? "font-bold" : ""}`}>
+                        {link.name}
+                      </span>
+                      {link.isSpecial && (
+                        <div className="ml-auto flex items-center space-x-2">
+                          <span className="px-2 py-1 bg-white/20 rounded-full text-xs font-bold animate-pulse">
+                            NEW
+                          </span>
+                          <span className="animate-bounce">✨</span>
+                        </div>
+                      )}
                     </a>
                   ))}
                 </div>
