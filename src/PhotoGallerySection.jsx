@@ -784,7 +784,7 @@ const PhotoGallerySection = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-amber-400 to-orange-500 rounded-3xl blur-2xl opacity-30 scale-110 group-hover:opacity-50 transition-opacity duration-500"></div>
                 <div className="relative">
                   <img
-                    src="/team.png"
+                    src="/Team.png"
                     alt="Featured Community Member"
                     className="relative w-full h-96 object-cover rounded-3xl shadow-2xl transform group-hover:scale-105 transition-all duration-500"
                   />
