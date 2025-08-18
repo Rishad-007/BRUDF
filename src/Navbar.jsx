@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-const Navbar = ({ onJoinClick }) => {
+const Navbar = ({ onJoinClick, onBannerClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -129,25 +129,27 @@ const Navbar = ({ onJoinClick }) => {
                   link.isSpecial
                     ? // Special styling for Certificate link
                       activeSection === link.id
-                      ? isScrolled 
+                      ? isScrolled
                         ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 shadow-lg animate-pulse"
                         : "text-white bg-gradient-to-r from-green-400 to-emerald-500 shadow-xl animate-pulse"
                       : isScrolled
                       ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
                       : "text-white bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 shadow-lg hover:shadow-xl"
                     : // Regular styling for other links
-                      activeSection === link.id
-                      ? isScrolled
-                        ? "text-amber-600 bg-amber-50"
-                        : "text-yellow-300 bg-white/20"
-                      : isScrolled
-                      ? "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
-                      : "text-white hover:text-yellow-300 hover:bg-white/10"
+                    activeSection === link.id
+                    ? isScrolled
+                      ? "text-amber-600 bg-amber-50"
+                      : "text-yellow-300 bg-white/20"
+                    : isScrolled
+                    ? "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
+                    : "text-white hover:text-yellow-300 hover:bg-white/10"
                 }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span className="text-xs">{link.icon}</span>
-                  <span className={link.isSpecial ? "font-bold" : ""}>{link.name}</span>
+                  <span className={link.isSpecial ? "font-bold" : ""}>
+                    {link.name}
+                  </span>
                   {link.isSpecial && (
                     <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded-full text-xs font-bold animate-bounce">
                       ✨
@@ -155,16 +157,19 @@ const Navbar = ({ onJoinClick }) => {
                   )}
                 </span>
                 {activeSection === link.id && (
-                  <div className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full animate-pulse ${
-                    link.isSpecial ? "bg-green-300" : "bg-amber-500"
-                  }`}></div>
+                  <div
+                    className={`absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 rounded-full animate-pulse ${
+                      link.isSpecial ? "bg-green-300" : "bg-amber-500"
+                    }`}
+                  ></div>
                 )}
               </a>
             ))}
           </div>
 
           {/* Enhanced CTA Button - Desktop */}
-          <div className="hidden lg:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center">
+            {/* Main Join Button */}
             <button
               onClick={onJoinClick}
               className="group relative px-6 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-red-600 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 text-sm overflow-hidden"
@@ -286,14 +291,18 @@ const Navbar = ({ onJoinClick }) => {
                             activeSection === link.id
                             ? "text-white bg-gradient-to-r from-green-500 to-emerald-600 border-l-4 border-green-300 shadow-lg"
                             : "text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow-md hover:shadow-lg"
-                          : // Regular styling for other links  
-                            activeSection === link.id
-                            ? "text-amber-700 bg-amber-50 border-l-4 border-amber-500"
-                            : "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
+                          : // Regular styling for other links
+                          activeSection === link.id
+                          ? "text-amber-700 bg-amber-50 border-l-4 border-amber-500"
+                          : "text-gray-700 hover:text-amber-600 hover:bg-amber-50"
                       }`}
                     >
                       <span className="text-lg">{link.icon}</span>
-                      <span className={`font-semibold ${link.isSpecial ? "font-bold" : ""}`}>
+                      <span
+                        className={`font-semibold ${
+                          link.isSpecial ? "font-bold" : ""
+                        }`}
+                      >
                         {link.name}
                       </span>
                       {link.isSpecial && (
