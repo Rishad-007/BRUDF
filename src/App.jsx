@@ -26,8 +26,22 @@ function App() {
   const openAdminPanel = () => setIsAdminPanelOpen(true);
   const closeAdminPanel = () => setIsAdminPanelOpen(false);
 
-  const openRegistrationBanner = () => setIsRegistrationBannerOpen(true);
-  const closeRegistrationBanner = () => setIsRegistrationBannerOpen(false);
+  const openRegistrationBanner = () => {
+    console.log("Opening registration banner manually");
+    setIsRegistrationBannerOpen(true);
+  };
+  
+  const closeRegistrationBanner = () => {
+    console.log("Closing registration banner");
+    setIsRegistrationBannerOpen(false);
+  };
+
+  // Function to reset banner state for testing
+  const resetBannerState = () => {
+    localStorage.removeItem("brudf-visited");
+    localStorage.removeItem("brudf-banner-dismissed");
+    console.log("Banner state reset - reload page to see banner");
+  };
 
   // Show registration banner on first visit
   React.useEffect(() => {
@@ -40,27 +54,23 @@ function App() {
     // localStorage.removeItem("brudf-visited");
     // localStorage.removeItem("brudf-banner-dismissed");
 
-    // Show banner if user hasn't visited before OR if banner wasn't permanently dismissed
-    if (!hasVisited && !bannerDismissed) {
+    // Always show banner for new users or users who haven't permanently dismissed it
+    if (!bannerDismissed) {
       // Show banner after a short delay for better UX
       const timer = setTimeout(() => {
         console.log("Showing registration banner"); // Debug log
         setIsRegistrationBannerOpen(true);
-        localStorage.setItem("brudf-visited", "true");
+        if (!hasVisited) {
+          localStorage.setItem("brudf-visited", "true");
+        }
       }, 2000);
-      return () => clearTimeout(timer);
-    } else if (!bannerDismissed) {
-      // If user has visited but banner wasn't permanently dismissed, show it anyway
-      const timer = setTimeout(() => {
-        console.log("Showing registration banner for returning user"); // Debug log
-        setIsRegistrationBannerOpen(true);
-      }, 3000);
       return () => clearTimeout(timer);
     }
   }, []);
 
   // Admin panel shortcut: Ctrl+Shift+A or Cmd+Shift+A
   // Banner test shortcut: Ctrl+Shift+B or Cmd+Shift+B
+  // Banner reset shortcut: Ctrl+Shift+R or Cmd+Shift+R
   React.useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "A") {
@@ -73,9 +83,29 @@ function App() {
         console.log("Manual banner trigger");
         setIsRegistrationBannerOpen(true);
       }
+      // Reset banner state shortcut
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "R") {
+        e.preventDefault();
+        resetBannerState();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    
+    // Expose functions globally for debugging
+    window.debugBRUDF = {
+      openBanner: openRegistrationBanner,
+      closeBanner: closeRegistrationBanner,
+      resetBanner: resetBannerState,
+      checkBannerState: () => {
+        console.log("Banner state:", {
+          hasVisited: localStorage.getItem("brudf-visited"),
+          bannerDismissed: localStorage.getItem("brudf-banner-dismissed"),
+          isOpen: isRegistrationBannerOpen
+        });
+      }
+    };
+    
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 

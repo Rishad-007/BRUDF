@@ -11,6 +11,7 @@ import {
   deleteMember,
   closeDatabase,
 } from "./database.js";
+import { getCombinedMemberData, exportAllDataToCSV } from "./csvReader.js";
 
 dotenv.config();
 
@@ -113,11 +114,20 @@ app.get("/api/members", async (req, res) => {
       });
     }
 
-    const members = await getAllMembers();
+    // Get current database members
+    const databaseMembers = await getAllMembers();
+    
+    // Get combined data (database + CSV)
+    const combinedData = await getCombinedMemberData(databaseMembers);
 
     res.json({
       success: true,
-      members: members,
+      members: combinedData.members,
+      stats: {
+        total: combinedData.total,
+        current: combinedData.current,
+        previous: combinedData.previous,
+      },
     });
   } catch (error) {
     console.error("Error getting members:", error);
@@ -151,6 +161,14 @@ app.delete("/api/members/:id", async (req, res) => {
       });
     }
 
+    // Only allow deletion of current database members (not CSV data)
+    if (id.toString().startsWith('prev_')) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot delete previous data entries",
+      });
+    }
+
     const deleted = await deleteMember(parseInt(id));
 
     if (deleted) {
@@ -169,6 +187,51 @@ app.delete("/api/members/:id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to delete member",
+    });
+  }
+});
+
+// Export all members as CSV (admin only)
+app.get("/api/members/export", async (req, res) => {
+  try {
+    const { password } = req.query;
+
+    if (
+      password !== process.env.ADMIN_PASSWORD &&
+      password !== "brudf2024admin"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access",
+      });
+    }
+
+    if (!dbInitialized) {
+      return res.status(500).json({
+        success: false,
+        message: "Database not initialized",
+      });
+    }
+
+    // Get current database members
+    const databaseMembers = await getAllMembers();
+    
+    // Get combined data (database + CSV)
+    const combinedData = await getCombinedMemberData(databaseMembers);
+
+    // Generate CSV content
+    const csvContent = exportAllDataToCSV(combinedData.members);
+
+    // Set appropriate headers for file download
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="brudf-all-members-${new Date().toISOString().split('T')[0]}.csv"`);
+    
+    res.send(csvContent);
+  } catch (error) {
+    console.error("Error exporting members:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to export members",
     });
   }
 });

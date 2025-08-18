@@ -4,8 +4,12 @@ const AdminPanel = ({ isOpen, onClose }) => {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [members, setMembers] = useState([]);
+  const [filteredMembers, setFilteredMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState({ total: 0, current: 0, previous: 0 });
+  const [filterType, setFilterType] = useState("all"); // all, current, previous
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,6 +25,8 @@ const AdminPanel = ({ isOpen, onClose }) => {
       if (result.success) {
         setIsAuthenticated(true);
         setMembers(result.members);
+        setStats(result.stats || { total: result.members.length, current: 0, previous: 0 });
+        setFilteredMembers(result.members);
       } else {
         setError("Invalid password");
       }
@@ -31,7 +37,43 @@ const AdminPanel = ({ isOpen, onClose }) => {
     }
   };
 
+  // Filter members based on type and search term
+  const applyFilters = () => {
+    let filtered = members;
+
+    // Filter by type
+    if (filterType === "current") {
+      filtered = filtered.filter(member => !member.isPreviousData);
+    } else if (filterType === "previous") {
+      filtered = filtered.filter(member => member.isPreviousData);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      filtered = filtered.filter(member => 
+        member.name.toLowerCase().includes(search) ||
+        member.email.toLowerCase().includes(search) ||
+        member.department.toLowerCase().includes(search) ||
+        member.year.toLowerCase().includes(search)
+      );
+    }
+
+    setFilteredMembers(filtered);
+  };
+
+  // Apply filters whenever dependencies change
+  React.useEffect(() => {
+    applyFilters();
+  }, [members, filterType, searchTerm]);
+
   const handleDeleteMember = async (id) => {
+    // Check if it's a previous data entry
+    if (id.toString().startsWith('prev_')) {
+      alert("Cannot delete previous data entries");
+      return;
+    }
+
     if (!window.confirm("Are you sure you want to delete this member?")) {
       return;
     }
@@ -48,6 +90,15 @@ const AdminPanel = ({ isOpen, onClose }) => {
 
       if (result.success) {
         setMembers(members.filter((member) => member.id !== id));
+        // Update stats
+        const deletedMember = members.find(m => m.id === id);
+        if (deletedMember && !deletedMember.isPreviousData) {
+          setStats(prev => ({
+            ...prev,
+            total: prev.total - 1,
+            current: prev.current - 1
+          }));
+        }
       } else {
         alert("Failed to delete member");
       }
@@ -57,52 +108,20 @@ const AdminPanel = ({ isOpen, onClose }) => {
   };
 
   const exportToCSV = () => {
-    if (members.length === 0) return;
-
-    const headers = [
-      "Name",
-      "Email",
-      "Phone",
-      "Blood Group",
-      "Department",
-      "Year",
-      "Motivation",
-      "Experience",
-      "Interests",
-      "Submitted At",
-    ];
-    const csvContent = [
-      headers.join(","),
-      ...members.map((member) =>
-        [
-          `"${member.name}"`,
-          `"${member.email}"`,
-          `"${member.phone}"`,
-          `"${member.bloodGroup}"`,
-          `"${member.department}"`,
-          `"${member.year}"`,
-          `"${member.motivation?.replace(/"/g, '""')}"`,
-          `"${member.experience?.replace(/"/g, '""')}"`,
-          `"${member.interests?.join("; ")}"`,
-          `"${new Date(member.submittedAt).toLocaleDateString()}"`,
-        ].join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `brudf-members-${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
+    // Use the server endpoint for exporting combined data
+    const exportUrl = `/api/members/export?password=${encodeURIComponent(password)}`;
+    window.open(exportUrl, '_blank');
   };
 
   const handleClose = () => {
     setIsAuthenticated(false);
     setPassword("");
     setMembers([]);
+    setFilteredMembers([]);
     setError("");
+    setSearchTerm("");
+    setFilterType("all");
+    setStats({ total: 0, current: 0, previous: 0 });
     onClose();
   };
 
@@ -196,32 +215,99 @@ const AdminPanel = ({ isOpen, onClose }) => {
               </form>
             ) : (
               <div>
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-semibold text-gray-800">
-                    Registered Members ({members.length})
-                  </h3>
-                  <button
-                    onClick={exportToCSV}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
-                  >
-                    <svg
-                      className="w-4 h-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                {/* Header with stats and controls */}
+                <div className="mb-6">
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                    <div>
+                      <h3 className="text-xl font-semibold text-gray-800">
+                        BRUDF Members
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-600">
+                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                          Total: {stats.total}
+                        </span>
+                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                          Current: {stats.current}
+                        </span>
+                        <span className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full">
+                          Previous: {stats.previous}
+                        </span>
+                        <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                          Showing: {filteredMembers.length}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={exportToCSV}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors duration-200"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                      </svg>
+                      <span>Export All CSV</span>
+                    </button>
+                  </div>
+
+                  {/* Filters */}
+                  <div className="flex flex-wrap items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                    {/* Search */}
+                    <div className="flex-1 min-w-64">
+                      <input
+                        type="text"
+                        placeholder="Search by name, email, department, or year..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
-                    </svg>
-                    <span>Export CSV</span>
-                  </button>
+                    </div>
+
+                    {/* Filter buttons */}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setFilterType("all")}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          filterType === "all"
+                            ? "bg-blue-600 text-white"
+                            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        All ({stats.total})
+                      </button>
+                      <button
+                        onClick={() => setFilterType("current")}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          filterType === "current"
+                            ? "bg-green-600 text-white"
+                            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        Current ({stats.current})
+                      </button>
+                      <button
+                        onClick={() => setFilterType("previous")}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          filterType === "previous"
+                            ? "bg-orange-600 text-white"
+                            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        Previous ({stats.previous})
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
-                {members.length === 0 ? (
+                {filteredMembers.length === 0 ? (
                   <div className="text-center py-12">
                     <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
                       <svg
@@ -239,57 +325,86 @@ const AdminPanel = ({ isOpen, onClose }) => {
                       </svg>
                     </div>
                     <h4 className="text-lg font-medium text-gray-800 mb-2">
-                      No Members Yet
+                      {searchTerm || filterType !== "all" ? "No matches found" : "No Members Yet"}
                     </h4>
                     <p className="text-gray-600">
-                      Member registrations will appear here
+                      {searchTerm || filterType !== "all" 
+                        ? "Try adjusting your filters or search terms"
+                        : "Member registrations will appear here"
+                      }
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {members.map((member) => (
+                    {filteredMembers.map((member) => (
                       <div
                         key={member.id}
-                        className="bg-gray-50 rounded-xl p-6 border border-gray-200"
+                        className={`rounded-xl p-6 border-2 ${
+                          member.isPreviousData
+                            ? "bg-orange-50 border-orange-200"
+                            : "bg-green-50 border-green-200"
+                        }`}
                       >
                         <div className="flex justify-between items-start mb-4">
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-gray-800">
-                              {member.name}
-                            </h4>
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-lg font-semibold text-gray-800">
+                                {member.name}
+                              </h4>
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                  member.isPreviousData
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-green-100 text-green-800"
+                                }`}
+                              >
+                                {member.isPreviousData ? "Previous Data" : "Current"}
+                              </span>
+                            </div>
                             <p className="text-gray-600">{member.email}</p>
                             <p className="text-sm text-gray-500">
                               Submitted:{" "}
-                              {new Date(member.submittedAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
+                              {member.submittedAt ? (
+                                member.isPreviousData ? (
+                                  // For previous data, parse the date string differently
+                                  member.submittedAt
+                                ) : (
+                                  new Date(member.submittedAt).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    }
+                                  )
+                                )
+                              ) : (
+                                "Date not available"
                               )}
                             </p>
                           </div>
-                          <button
-                            onClick={() => handleDeleteMember(member.id)}
-                            className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                          >
-                            <svg
-                              className="w-5 h-5"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
+                          {!member.isPreviousData && (
+                            <button
+                              onClick={() => handleDeleteMember(member.id)}
+                              className="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors duration-200"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          )}
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -297,25 +412,25 @@ const AdminPanel = ({ isOpen, onClose }) => {
                             <span className="font-medium text-gray-700">
                               Phone:
                             </span>{" "}
-                            {member.phone}
+                            {member.phone || "Not provided"}
                           </div>
                           <div>
                             <span className="font-medium text-gray-700">
                               Blood Group:
                             </span>{" "}
-                            {member.bloodGroup}
+                            {member.bloodGroup || "Not provided"}
                           </div>
                           <div>
                             <span className="font-medium text-gray-700">
                               Department:
                             </span>{" "}
-                            {member.department}
+                            {member.department || "Not provided"}
                           </div>
                           <div>
                             <span className="font-medium text-gray-700">
                               Year:
                             </span>{" "}
-                            {member.year}
+                            {member.year || "Not provided"}
                           </div>
                         </div>
 
