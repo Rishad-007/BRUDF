@@ -25,7 +25,13 @@ const AdminPanel = ({ isOpen, onClose }) => {
       if (result.success) {
         setIsAuthenticated(true);
         setMembers(result.members);
-        setStats(result.stats || { total: result.members.length, current: 0, previous: 0 });
+        setStats(
+          result.stats || {
+            total: result.members.length,
+            current: 0,
+            previous: 0,
+          }
+        );
         setFilteredMembers(result.members);
       } else {
         setError("Invalid password");
@@ -43,19 +49,20 @@ const AdminPanel = ({ isOpen, onClose }) => {
 
     // Filter by type
     if (filterType === "current") {
-      filtered = filtered.filter(member => !member.isPreviousData);
+      filtered = filtered.filter((member) => !member.isPreviousData);
     } else if (filterType === "previous") {
-      filtered = filtered.filter(member => member.isPreviousData);
+      filtered = filtered.filter((member) => member.isPreviousData);
     }
 
     // Filter by search term
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(member => 
-        member.name.toLowerCase().includes(search) ||
-        member.email.toLowerCase().includes(search) ||
-        member.department.toLowerCase().includes(search) ||
-        member.year.toLowerCase().includes(search)
+      filtered = filtered.filter(
+        (member) =>
+          member.name.toLowerCase().includes(search) ||
+          member.email.toLowerCase().includes(search) ||
+          member.department.toLowerCase().includes(search) ||
+          member.year.toLowerCase().includes(search)
       );
     }
 
@@ -69,7 +76,7 @@ const AdminPanel = ({ isOpen, onClose }) => {
 
   const handleDeleteMember = async (id) => {
     // Check if it's a previous data entry
-    if (id.toString().startsWith('prev_')) {
+    if (id.toString().startsWith("prev_")) {
       alert("Cannot delete previous data entries");
       return;
     }
@@ -91,12 +98,12 @@ const AdminPanel = ({ isOpen, onClose }) => {
       if (result.success) {
         setMembers(members.filter((member) => member.id !== id));
         // Update stats
-        const deletedMember = members.find(m => m.id === id);
+        const deletedMember = members.find((m) => m.id === id);
         if (deletedMember && !deletedMember.isPreviousData) {
-          setStats(prev => ({
+          setStats((prev) => ({
             ...prev,
             total: prev.total - 1,
-            current: prev.current - 1
+            current: prev.current - 1,
           }));
         }
       } else {
@@ -109,8 +116,10 @@ const AdminPanel = ({ isOpen, onClose }) => {
 
   const exportToCSV = () => {
     // Use the server endpoint for exporting combined data
-    const exportUrl = `/api/members/export?password=${encodeURIComponent(password)}`;
-    window.open(exportUrl, '_blank');
+    const exportUrl = `/api/members/export?password=${encodeURIComponent(
+      password
+    )}`;
+    window.open(exportUrl, "_blank");
   };
 
   const handleClose = () => {
@@ -325,13 +334,14 @@ const AdminPanel = ({ isOpen, onClose }) => {
                       </svg>
                     </div>
                     <h4 className="text-lg font-medium text-gray-800 mb-2">
-                      {searchTerm || filterType !== "all" ? "No matches found" : "No Members Yet"}
+                      {searchTerm || filterType !== "all"
+                        ? "No matches found"
+                        : "No Members Yet"}
                     </h4>
                     <p className="text-gray-600">
-                      {searchTerm || filterType !== "all" 
+                      {searchTerm || filterType !== "all"
                         ? "Try adjusting your filters or search terms"
-                        : "Member registrations will appear here"
-                      }
+                        : "Member registrations will appear here"}
                     </p>
                   </div>
                 ) : (
@@ -358,31 +368,28 @@ const AdminPanel = ({ isOpen, onClose }) => {
                                     : "bg-green-100 text-green-800"
                                 }`}
                               >
-                                {member.isPreviousData ? "Previous Data" : "Current"}
+                                {member.isPreviousData
+                                  ? "Previous Data"
+                                  : "Current"}
                               </span>
                             </div>
                             <p className="text-gray-600">{member.email}</p>
                             <p className="text-sm text-gray-500">
                               Submitted:{" "}
-                              {member.submittedAt ? (
-                                member.isPreviousData ? (
-                                  // For previous data, parse the date string differently
-                                  member.submittedAt
-                                ) : (
-                                  new Date(member.submittedAt).toLocaleDateString(
-                                    "en-US",
-                                    {
+                              {member.submittedAt
+                                ? member.isPreviousData
+                                  ? // For previous data, parse the date string differently
+                                    member.submittedAt
+                                  : new Date(
+                                      member.submittedAt
+                                    ).toLocaleDateString("en-US", {
                                       year: "numeric",
                                       month: "long",
                                       day: "numeric",
                                       hour: "2-digit",
                                       minute: "2-digit",
-                                    }
-                                  )
-                                )
-                              ) : (
-                                "Date not available"
-                              )}
+                                    })
+                                : "Date not available"}
                             </p>
                           </div>
                           {!member.isPreviousData && (

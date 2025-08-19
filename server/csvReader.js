@@ -49,7 +49,12 @@ function parseCSVLine(line) {
  */
 export function readPreviousData() {
   try {
-    const csvPath = path.join(__dirname, "data", "previousData", "brudf-members-2025-08-18.csv");
+    const csvPath = path.join(
+      __dirname,
+      "data",
+      "previousData",
+      "brudf-members-2025-08-18.csv"
+    );
 
     if (!fs.existsSync(csvPath)) {
       console.log("Previous data CSV file not found");

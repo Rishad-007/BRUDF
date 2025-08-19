@@ -116,7 +116,7 @@ app.get("/api/members", async (req, res) => {
 
     // Get current database members
     const databaseMembers = await getAllMembers();
-    
+
     // Get combined data (database + CSV)
     const combinedData = await getCombinedMemberData(databaseMembers);
 
@@ -162,7 +162,7 @@ app.delete("/api/members/:id", async (req, res) => {
     }
 
     // Only allow deletion of current database members (not CSV data)
-    if (id.toString().startsWith('prev_')) {
+    if (id.toString().startsWith("prev_")) {
       return res.status(400).json({
         success: false,
         message: "Cannot delete previous data entries",
@@ -215,7 +215,7 @@ app.get("/api/members/export", async (req, res) => {
 
     // Get current database members
     const databaseMembers = await getAllMembers();
-    
+
     // Get combined data (database + CSV)
     const combinedData = await getCombinedMemberData(databaseMembers);
 
@@ -223,9 +223,14 @@ app.get("/api/members/export", async (req, res) => {
     const csvContent = exportAllDataToCSV(combinedData.members);
 
     // Set appropriate headers for file download
-    res.setHeader('Content-Type', 'text/csv');
-    res.setHeader('Content-Disposition', `attachment; filename="brudf-all-members-${new Date().toISOString().split('T')[0]}.csv"`);
-    
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="brudf-all-members-${
+        new Date().toISOString().split("T")[0]
+      }.csv"`
+    );
+
     res.send(csvContent);
   } catch (error) {
     console.error("Error exporting members:", error);
@@ -249,8 +254,11 @@ app.post("/api/validate-certificate", (req, res) => {
     }
 
     // Read the certificate validation file
-    const certificateFilePath = path.join(__dirname, "certificateValidation.txt");
-    
+    const certificateFilePath = path.join(
+      __dirname,
+      "certificateValidation.txt"
+    );
+
     if (!fs.existsSync(certificateFilePath)) {
       return res.status(500).json({
         success: false,
@@ -258,18 +266,19 @@ app.post("/api/validate-certificate", (req, res) => {
       });
     }
 
-    const validCertificates = fs.readFileSync(certificateFilePath, "utf8")
+    const validCertificates = fs
+      .readFileSync(certificateFilePath, "utf8")
       .split("\n")
-      .map(code => code.trim())
-      .filter(code => code.length > 0);
+      .map((code) => code.trim())
+      .filter((code) => code.length > 0);
 
     const isValid = validCertificates.includes(certificateCode.trim());
 
     res.json({
       success: true,
       valid: isValid,
-      message: isValid 
-        ? "Certificate is valid and verified!" 
+      message: isValid
+        ? "Certificate is valid and verified!"
         : "Certificate code not found. Please check your certificate code.",
     });
   } catch (error) {

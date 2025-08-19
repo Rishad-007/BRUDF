@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BRUDF Banner Test</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f0f0f0;
+      }
+      .test-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .button {
+        background: linear-gradient(135deg, #f59e0b, #ea580c);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin: 10px;
+        font-weight: bold;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+      .info {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 8px;
+        padding: 16px;
+        margin: 20px 0;
+      }
+      .status {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: monospace;
+      }
+      .status.good {
+        background: #d1fae5;
+        border: 1px solid #10b981;
+      }
+      .status.warning {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1>🎯 BRUDF Banner Diagnostic Tool</h1>
+
+      <div class="info">
+        <h3>Banner Issue Diagnosis</h3>
+        <p>
+          This tool helps identify why the registration banner might not be
+          showing up.
+        </p>
+      </div>
+
+      <h3>Current Status:</h3>
+      <div id="status-container"></div>
+
+      <h3>Test Actions:</h3>
+      <button class="button" onclick="checkLocalStorage()">
+        Check LocalStorage
+      </button>
+      <button class="button" onclick="clearBannerData()">
+        Clear Banner Data
+      </button>
+      <button class="button" onclick="simulateFirstVisit()">
+        Simulate First Visit
+      </button>
+      <button class="button" onclick="openMainSite()">Open Main Site</button>
+
+      <h3>Debug Information:</h3>
+      <div id="debug-info"></div>
+
+      <h3>Instructions:</h3>
+      <div class="info">
+        <ol>
+          <li><strong>Check LocalStorage:</strong> See current banner state</li>
+          <li>
+            <strong>Clear Banner Data:</strong> Reset all banner-related storage
+          </li>
+          <li>
+            <strong>Simulate First Visit:</strong> Set up state for first-time
+            user
+          </li>
+          <li>
+            <strong>Open Main Site:</strong> Go to main site to test banner
+          </li>
+        </ol>
+
+        <h4>Keyboard Shortcuts (on main site):</h4>
+        <ul>
+          <li>
+            <code>Ctrl+Shift+B</code> (or <code>Cmd+Shift+B</code>): Force show
+            banner
+          </li>
+          <li>
+            <code>Ctrl+Shift+R</code> (or <code>Cmd+Shift+R</code>): Reset
+            banner state
+          </li>
+          <li>
+            <code>Ctrl+Shift+A</code> (or <code>Cmd+Shift+A</code>): Open admin
+            panel
+          </li>
+        </ul>
+
+        <h4>Console Commands (on main site):</h4>
+        <ul>
+          <li><code>window.debugBRUDF.openBanner()</code>: Open banner</li>
+          <li>
+            <code>window.debugBRUDF.checkBannerState()</code>: Check banner
+            state
+          </li>
+          <li><code>window.debugBRUDF.resetBanner()</code>: Reset banner</li>
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      function updateStatus() {
+        const statusContainer = document.getElementById("status-container");
+        const debugInfo = document.getElementById("debug-info");
+
+        const hasVisited = localStorage.getItem("brudf-visited");
+        const bannerDismissed = localStorage.getItem("brudf-banner-dismissed");
+
+        let statusClass = "good";
+        let statusText = "Banner should show on main site";
+
+        if (bannerDismissed) {
+          statusClass = "warning";
+          statusText = "Banner is permanently dismissed";
+        }
+
+        statusContainer.innerHTML = `
+                <div class="status ${statusClass}">
+                    Status: ${statusText}
+                </div>
+            `;
+
+        debugInfo.innerHTML = `
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; font-family: monospace;">
+                    <div><strong>brudf-visited:</strong> ${
+                      hasVisited || "null"
+                    }</div>
+                    <div><strong>brudf-banner-dismissed:</strong> ${
+                      bannerDismissed || "null"
+                    }</div>
+                    <div><strong>Timestamp:</strong> ${new Date().toLocaleString()}</div>
+                </div>
+            `;
+      }
+
+      function checkLocalStorage() {
+        updateStatus();
+        alert("LocalStorage checked - see Debug Information section");
+      }
+
+      function clearBannerData() {
+        localStorage.removeItem("brudf-visited");
+        localStorage.removeItem("brudf-banner-dismissed");
+        updateStatus();
+        alert(
+          "Banner data cleared! The banner should now show on first visit to the main site."
+        );
+      }
+
+      function simulateFirstVisit() {
+        localStorage.removeItem("brudf-visited");
+        localStorage.removeItem("brudf-banner-dismissed");
+        updateStatus();
+        alert(
+          "Simulated first visit! Go to main site and the banner should appear after 2 seconds."
+        );
+      }
+
+      function openMainSite() {
+        window.open("/", "_blank");
+      }
+
+      // Initial status check
+      updateStatus();
+
+      // Auto-refresh status every 2 seconds
+      setInterval(updateStatus, 2000);
+    </script>
+  </body>
+</html>

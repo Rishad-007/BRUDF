@@ -30,7 +30,7 @@ function App() {
     console.log("Opening registration banner manually");
     setIsRegistrationBannerOpen(true);
   };
-  
+
   const closeRegistrationBanner = () => {
     console.log("Closing registration banner");
     setIsRegistrationBannerOpen(false);
@@ -91,7 +91,7 @@ function App() {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    
+
     // Expose functions globally for debugging
     window.debugBRUDF = {
       openBanner: openRegistrationBanner,
@@ -101,11 +101,11 @@ function App() {
         console.log("Banner state:", {
           hasVisited: localStorage.getItem("brudf-visited"),
           bannerDismissed: localStorage.getItem("brudf-banner-dismissed"),
-          isOpen: isRegistrationBannerOpen
+          isOpen: isRegistrationBannerOpen,
         });
-      }
+      },
     };
-    
+
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
