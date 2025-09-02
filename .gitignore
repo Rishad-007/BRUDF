@@ -15,6 +15,20 @@ build/
 .env.test.local
 .env.production.local
 
+# Multi-layer Database and Backup files
+server/data/*.db
+server/data/backup/
+server/data/emergencyBackup/
+server/data/primaryData/
+server/data/backupData/
+server/data/csvBackups/
+server/data/combined_*.json
+server/data/*backup*.json
+server/data/*backup*.csv
+
+# Keep CSV source data but ignore generated backups
+!server/data/previousData/memberdata.csv
+
 # IDE and editor files
 .vscode/
 .idea/

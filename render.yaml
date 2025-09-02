@@ -2,6 +2,25 @@ services:
   - type: web
     name: brudf-website
     env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ADMIN_PASSWORD
+        value: brudf2024admin
+      - key: BACKUP_ENABLED
+        value: "true"
+      - key: AUTO_BACKUP_INTERVAL
+        value: "1800000" # 30 minutes
+    # Persistent disk for multi-layer data storage
+    disk:
+      name: brudf-persistent-storage
+      mountPath: /opt/render/project/src/server/data
+      sizeGB: 2 # Increased for multiple backups and redundancy
+  - type: web
+    name: brudf-website
+    env: node
     buildCommand: npm run render-build
     startCommand: npm start
     envVars:

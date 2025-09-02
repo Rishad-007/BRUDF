@@ -9,7 +9,12 @@
     "preview": "vite preview",
     "start": "node server/index.js",
     "dev:server": "node server/index.js",
-    "render-build": "npm install && npm run build"
+    "render-build": "npm install && npm run build",
+    "backup:create": "node server/database.js --backup",
+    "backup:csv": "node server/csvReader.js --export",
+    "data:recover": "node server/dataRecovery.js",
+    "data:backup": "node -e \"import('./server/database.js').then(db => db.createDatabaseBackup().then(() => db.createCSVBackup()))\"",
+    "data:check": "node -e \"import('./server/csvReader.js').then(csv => csv.persistenceManager.loadFromMultipleLocations().then(data => console.log('Available data sources:', data.length)))\""
   },
   "dependencies": {
     "cors": "^2.8.5",
