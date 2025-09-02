@@ -10,8 +10,15 @@ import {
   getAllMembers,
   deleteMember,
   closeDatabase,
+  createDatabaseBackup,
+  createCSVBackup,
 } from "./database.js";
-import { getCombinedMemberData, exportAllDataToCSV } from "./csvReader.js";
+import {
+  getCombinedMemberData,
+  exportAllDataToCSV,
+  persistenceManager,
+} from "./csvReader.js";
+import config from "./config.js";
 
 dotenv.config();
 
@@ -28,7 +35,19 @@ async function setupDatabase() {
   try {
     await initDatabase();
     dbInitialized = true;
-    console.log("✅ Database initialized successfully");
+    console.log("✅ Multi-layer database initialized successfully");
+
+    // Start comprehensive backup system
+    persistenceManager.startAutoBackup();
+
+    // Initial data preservation
+    const members = await getAllMembers();
+    await persistenceManager.saveToMultipleLocations(
+      members,
+      "initial_backup.json"
+    );
+
+    console.log("🛡️ Multi-layer data protection activated");
   } catch (error) {
     console.error("❌ Failed to initialize database:", error);
     process.exit(1);
@@ -355,14 +374,54 @@ async function startServer() {
     });
   });
 
+  // Graceful shutdown with comprehensive data backup
   process.on("SIGINT", async () => {
     console.log("🔄 Received SIGINT, shutting down gracefully...");
+    await performShutdownBackup();
     await closeDatabase();
     server.close(() => {
       console.log("✅ Server closed");
       process.exit(0);
     });
   });
+
+  process.on("SIGTERM", async () => {
+    console.log("🛑 Received SIGTERM, performing graceful shutdown...");
+    await performShutdownBackup();
+    await closeDatabase();
+    process.exit(0);
+  });
+}
+
+/**
+ * Perform comprehensive backup before shutdown
+ */
+async function performShutdownBackup() {
+  try {
+    console.log("💾 Creating final backup before shutdown...");
+
+    // Get all current data
+    const members = await getAllMembers();
+
+    // Save to multiple locations
+    await persistenceManager.saveToMultipleLocations(
+      members,
+      `shutdown_backup_${Date.now()}.json`
+    );
+
+    // Create database backup
+    await createDatabaseBackup();
+
+    // Create CSV backup
+    await createCSVBackup();
+
+    // Stop auto-backup
+    persistenceManager.stopAutoBackup();
+
+    console.log("✅ Final backup completed successfully");
+  } catch (error) {
+    console.error("❌ Error during shutdown backup:", error);
+  }
 }
 
 startServer().catch((error) => {

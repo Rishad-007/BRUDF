@@ -8,8 +8,20 @@ const { Database } = sqlite3;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database file path
-const DB_PATH = path.join(__dirname, "data", "members.db");
+// Multi-layer storage configuration
+const storageConfig = {
+  primary:
+    process.env.NODE_ENV === "production"
+      ? "/opt/render/project/src/server/data/members.db"
+      : path.join(__dirname, "data", "members.db"),
+  backup: path.join(__dirname, "data", "backup", "members_backup.db"),
+  emergencyBackup: path.join(
+    __dirname,
+    "data",
+    "emergencyBackup",
+    "members_emergency.db"
+  ),
+};
 
 let db = null;
 
@@ -18,15 +30,19 @@ let db = null;
  */
 async function initDatabase() {
   try {
-    // Ensure the data directory exists
-    const dataDir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
+    // Ensure all storage directories exist
+    Object.values(storageConfig).forEach((dbPath) => {
+      const dataDir = path.dirname(dbPath);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+    });
+
+    console.log(`📁 Primary database: ${storageConfig.primary}`);
 
     // Open database connection
     db = await open({
-      filename: DB_PATH,
+      filename: storageConfig.primary,
       driver: Database,
     });
 
@@ -43,15 +59,127 @@ async function initDatabase() {
                 motivation TEXT,
                 experience TEXT,
                 interests TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `);
 
-    console.log("Database initialized successfully");
+    console.log("✅ Multi-layer database initialized successfully");
+
+    // Start automatic backup system
+    await setupAutomaticBackups();
     return db;
   } catch (error) {
     console.error("Error initializing database:", error);
     throw error;
+  }
+}
+
+/**
+ * Setup automatic backup system
+ */
+async function setupAutomaticBackups() {
+  try {
+    // Create initial backup
+    await createDatabaseBackup();
+    await createCSVBackup();
+
+    // Schedule regular backups every hour
+    setInterval(async () => {
+      await createDatabaseBackup();
+      await createCSVBackup();
+      await cleanupOldBackups();
+    }, 60 * 60 * 1000); // 1 hour
+
+    console.log("⏰ Automatic backup system started (1 hour intervals)");
+  } catch (error) {
+    console.error("❌ Failed to setup automatic backups:", error);
+  }
+}
+
+/**
+ * Create database backup
+ */
+async function createDatabaseBackup() {
+  try {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const backupPath = path.join(
+      path.dirname(storageConfig.backup),
+      `backup_${timestamp}.db`
+    );
+
+    // Simple file copy for SQLite backup
+    const sourceData = fs.readFileSync(storageConfig.primary);
+    fs.writeFileSync(backupPath, sourceData);
+
+    // Also create emergency backup
+    fs.writeFileSync(storageConfig.emergencyBackup, sourceData);
+
+    console.log(`🔄 Database backup created: ${backupPath}`);
+  } catch (error) {
+    console.error("❌ Database backup failed:", error);
+  }
+}
+
+/**
+ * Create CSV backup
+ */
+async function createCSVBackup() {
+  try {
+    const members = await getAllMembers();
+    if (!members || members.length === 0) return;
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const csvBackupDir = path.join(__dirname, "data", "csvBackups");
+
+    if (!fs.existsSync(csvBackupDir)) {
+      fs.mkdirSync(csvBackupDir, { recursive: true });
+    }
+
+    const csvPath = path.join(csvBackupDir, `members_backup_${timestamp}.csv`);
+
+    // Import the CSV export function
+    const { exportAllDataToCSV } = await import("./csvReader.js");
+    const csvContent = exportAllDataToCSV(members);
+
+    fs.writeFileSync(csvPath, csvContent);
+    console.log(`📊 CSV backup created: ${csvPath}`);
+  } catch (error) {
+    console.error("❌ CSV backup failed:", error);
+  }
+}
+
+/**
+ * Clean up old backup files (keep last 20 backups)
+ */
+async function cleanupOldBackups() {
+  try {
+    const backupDir = path.dirname(storageConfig.backup);
+    const csvBackupDir = path.join(__dirname, "data", "csvBackups");
+
+    [backupDir, csvBackupDir].forEach((dir) => {
+      if (fs.existsSync(dir)) {
+        const files = fs
+          .readdirSync(dir)
+          .filter((file) => file.includes("backup_"))
+          .map((file) => ({
+            name: file,
+            path: path.join(dir, file),
+            time: fs.statSync(path.join(dir, file)).mtime,
+          }))
+          .sort((a, b) => b.time - a.time);
+
+        // Keep only the latest 20 backups
+        if (files.length > 20) {
+          files.slice(20).forEach((file) => {
+            fs.unlinkSync(file.path);
+            console.log(`🗑️ Cleaned up old backup: ${file.name}`);
+          });
+        }
+      }
+    });
+  } catch (error) {
+    console.error("❌ Backup cleanup failed:", error);
   }
 }
 
@@ -254,4 +382,7 @@ export {
   updateMember,
   getStats,
   closeDatabase,
+  createDatabaseBackup,
+  createCSVBackup,
+  cleanupOldBackups,
 };

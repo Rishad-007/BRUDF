@@ -6,6 +6,122 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
+ * Multi-source data persistence manager
+ */
+export class DataPersistenceManager {
+  constructor() {
+    this.backupInterval = null;
+    this.storageLocations = [
+      path.join(__dirname, 'data', 'primaryData'),
+      path.join(__dirname, 'data', 'backupData'),
+      path.join(__dirname, 'data', 'emergencyBackup')
+    ];
+    
+    // Ensure all storage locations exist
+    this.storageLocations.forEach(location => {
+      if (!fs.existsSync(location)) {
+        fs.mkdirSync(location, { recursive: true });
+      }
+    });
+    
+    console.log("🏗️ Data persistence manager initialized with 3 storage locations");
+  }
+
+  /**
+   * Save data to multiple locations
+   */
+  async saveToMultipleLocations(data, filename = 'members.json') {
+    const dataString = JSON.stringify(data, null, 2);
+    const promises = [];
+
+    this.storageLocations.forEach((location, index) => {
+      const filePath = path.join(location, filename);
+      promises.push(
+        fs.promises.writeFile(filePath, dataString)
+          .then(() => console.log(`✅ Data saved to location ${index + 1}: ${filePath}`))
+          .catch(error => console.error(`❌ Failed to save to location ${index + 1}:`, error))
+      );
+    });
+
+    // Also save as CSV
+    if (Array.isArray(data)) {
+      const csvContent = exportAllDataToCSV(data);
+      this.storageLocations.forEach((location, index) => {
+        const csvPath = path.join(location, `${filename.replace('.json', '.csv')}`);
+        promises.push(
+          fs.promises.writeFile(csvPath, csvContent)
+            .then(() => console.log(`📊 CSV saved to location ${index + 1}: ${csvPath}`))
+            .catch(error => console.error(`❌ Failed to save CSV to location ${index + 1}:`, error))
+        );
+      });
+    }
+
+    await Promise.allSettled(promises);
+  }
+
+  /**
+   * Load data from multiple sources with fallback
+   */
+  async loadFromMultipleLocations(filename = 'members.json') {
+    for (let i = 0; i < this.storageLocations.length; i++) {
+      try {
+        const filePath = path.join(this.storageLocations[i], filename);
+        if (fs.existsSync(filePath)) {
+          const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+          console.log(`✅ Data loaded from location ${i + 1}: ${filePath}`);
+          return data;
+        }
+      } catch (error) {
+        console.error(`❌ Failed to load from location ${i + 1}:`, error);
+      }
+    }
+    
+    console.log('⚠️ No data found in any location, returning empty array');
+    return [];
+  }
+
+  /**
+   * Start automatic backup system
+   */
+  startAutoBackup(interval = 30 * 60 * 1000) { // 30 minutes default
+    if (this.backupInterval) {
+      clearInterval(this.backupInterval);
+    }
+
+    this.backupInterval = setInterval(async () => {
+      try {
+        // Get current data from database
+        const { getAllMembers } = await import('./database.js');
+        const members = await getAllMembers();
+        
+        // Save to multiple locations
+        await this.saveToMultipleLocations(members, `auto_backup_${Date.now()}.json`);
+        
+        console.log(`🔄 Auto-backup completed at ${new Date().toISOString()}`);
+      } catch (error) {
+        console.error('❌ Auto-backup failed:', error);
+      }
+    }, interval);
+
+    console.log(`⏰ Auto-backup started with ${interval / 60000} minute intervals`);
+  }
+
+  /**
+   * Stop automatic backup
+   */
+  stopAutoBackup() {
+    if (this.backupInterval) {
+      clearInterval(this.backupInterval);
+      this.backupInterval = null;
+      console.log('⏹️ Auto-backup stopped');
+    }
+  }
+}
+
+// Create singleton instance
+export const persistenceManager = new DataPersistenceManager();
+
+/**
  * Parse CSV line with proper handling of quoted fields
  */
 function parseCSVLine(line) {
@@ -53,11 +169,14 @@ export function readPreviousData() {
       __dirname,
       "data",
       "previousData",
-      "brudf-members-2025-08-18.csv"
+      "memberdata.csv"
     );
 
+    console.log("Looking for CSV file at:", csvPath);
+    console.log("File exists:", fs.existsSync(csvPath));
+
     if (!fs.existsSync(csvPath)) {
-      console.log("Previous data CSV file not found");
+      console.log("Previous data CSV file not found at:", csvPath);
       return [];
     }
 
@@ -135,10 +254,13 @@ export function readPreviousData() {
 }
 
 /**
- * Get combined data (database + CSV)
+ * Get combined data (database + CSV + backup sources)
  */
 export async function getCombinedMemberData(databaseMembers = []) {
   const previousMembers = readPreviousData();
+  
+  // Also try to load from backup locations
+  const backupMembers = await persistenceManager.loadFromMultipleLocations('backup_members.json');
 
   // Mark database members
   const currentMembers = databaseMembers.map((member) => ({
@@ -147,21 +269,28 @@ export async function getCombinedMemberData(databaseMembers = []) {
     isPreviousData: false,
   }));
 
-  // Combine and sort by submission date
-  const allMembers = [...previousMembers, ...currentMembers];
+  // Combine all sources (remove duplicates by email)
+  const allSources = [...previousMembers, ...currentMembers, ...backupMembers];
+  const uniqueMembers = allSources.filter((member, index, self) => 
+    index === self.findIndex(m => m.email === member.email)
+  );
 
   // Sort by date (newest first)
-  allMembers.sort((a, b) => {
+  uniqueMembers.sort((a, b) => {
     const dateA = new Date(a.submittedAt);
     const dateB = new Date(b.submittedAt);
     return dateB - dateA;
   });
 
+  // Save combined data to multiple locations for future recovery
+  await persistenceManager.saveToMultipleLocations(uniqueMembers, 'combined_members.json');
+
   return {
-    total: allMembers.length,
+    total: uniqueMembers.length,
     current: currentMembers.length,
     previous: previousMembers.length,
-    members: allMembers,
+    backup: backupMembers.length,
+    members: uniqueMembers,
   };
 }
 
