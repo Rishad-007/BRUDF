@@ -30,12 +30,81 @@ const PORT = process.env.PORT || 3001; // Changed from 5000 to 3001 to avoid con
 
 // Initialize database on startup
 let dbInitialized = false;
+let membersCache = null;
+let cacheLastUpdated = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
+
+// Helper function to get cached or fresh member data
+async function getCachedMemberData() {
+  const now = Date.now();
+
+  // Return cached data if still valid
+  if (membersCache && now - cacheLastUpdated < CACHE_DURATION) {
+    console.log("📋 Returning cached member data");
+    return membersCache;
+  }
+
+  // Get fresh data
+  console.log("🔄 Refreshing member data cache");
+  const databaseMembers = await getAllMembers();
+  const combinedData = await getCombinedMemberData(databaseMembers);
+
+  // Update cache
+  membersCache = combinedData;
+  cacheLastUpdated = now;
+
+  return combinedData;
+}
 
 async function setupDatabase() {
   try {
     await initDatabase();
     dbInitialized = true;
     console.log("✅ Multi-layer database initialized successfully");
+
+    // Read CSV data ONCE on startup only
+    console.log("🔄 Initializing data sources...");
+
+    // Reset CSV reading limits since structure may have changed
+    const { readPreviousData, persistenceManager } = await import(
+      "./csvReader.js"
+    );
+    persistenceManager.refreshCsvData(); // Reset limits for fresh read
+
+    const csvData = readPreviousData();
+
+    if (csvData.length > 0) {
+      console.log(
+        `📊 Processing ${csvData.length} CSV records for database import...`
+      );
+
+      let importedCount = 0;
+      for (const member of csvData) {
+        try {
+          // Try to add member, skip if email already exists
+          await addMember({
+            name: member.name,
+            email: member.email,
+            phone: member.phone,
+            bloodGroup: member.bloodGroup,
+            department: member.department,
+            year: member.year,
+            motivation: member.motivation,
+            experience: member.experience,
+            interests: member.interests || [],
+          });
+          importedCount++;
+        } catch (error) {
+          // Ignore duplicate entries
+          if (!error.message.includes("email already exists")) {
+            console.error("Error importing CSV member:", error.message);
+          }
+        }
+      }
+      console.log(
+        `✅ Imported ${importedCount} new members from CSV to database`
+      );
+    }
 
     // Start comprehensive backup system
     persistenceManager.startAutoBackup();
@@ -48,6 +117,7 @@ async function setupDatabase() {
     );
 
     console.log("🛡️ Multi-layer data protection activated");
+    console.log(`💾 Total members in database: ${members.length}`);
   } catch (error) {
     console.error("❌ Failed to initialize database:", error);
     process.exit(1);
@@ -88,6 +158,10 @@ app.post("/api/members", async (req, res) => {
     };
 
     const newMember = await addMember(memberData);
+
+    // Invalidate cache when new member is added
+    membersCache = null;
+    console.log("🔄 Cache invalidated due to new member addition");
 
     res.status(201).json({
       success: true,
@@ -133,11 +207,8 @@ app.get("/api/members", async (req, res) => {
       });
     }
 
-    // Get current database members
-    const databaseMembers = await getAllMembers();
-
-    // Get combined data (database + CSV)
-    const combinedData = await getCombinedMemberData(databaseMembers);
+    // Get combined data (database + CSV) with caching
+    const combinedData = await getCachedMemberData();
 
     res.json({
       success: true,
@@ -232,11 +303,8 @@ app.get("/api/members/export", async (req, res) => {
       });
     }
 
-    // Get current database members
-    const databaseMembers = await getAllMembers();
-
-    // Get combined data (database + CSV)
-    const combinedData = await getCombinedMemberData(databaseMembers);
+    // Get combined data (database + CSV) with caching
+    const combinedData = await getCachedMemberData();
 
     // Generate CSV content
     const csvContent = exportAllDataToCSV(combinedData.members);
