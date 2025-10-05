@@ -57,7 +57,7 @@ export const getDatabaseConfig = () => {
         password: process.env.SUPABASE_PASSWORD,
         ssl: { rejectUnauthorized: false },
       },
-      pool: { min: 2, max: 10 },
+      pool: { min: 1, max: 3 }, // Reduced pool size for Supabase session mode
       supabase: {
         url: process.env.SUPABASE_URL,
         anonKey: process.env.SUPABASE_ANON_KEY,

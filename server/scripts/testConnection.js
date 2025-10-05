@@ -3,8 +3,12 @@
  * Tests connectivity to different database providers
  */
 
+import dotenv from "dotenv";
 import { getDatabaseConfig, DB_PROVIDERS } from "../databaseConfig.js";
 import DatabaseAdapter from "../databaseAdapter.js";
+
+// Load environment variables
+dotenv.config();
 
 async function testConnection() {
   console.log("🔍 Testing database connection...");

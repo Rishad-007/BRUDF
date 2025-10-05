@@ -216,7 +216,7 @@ class DatabaseAdapter {
       case DB_PROVIDERS.SQLITE:
         return await this.addMemberSQL(member);
       case DB_PROVIDERS.POSTGRESQL:
-        return await this.addMemberPostgreSQL(member);
+        return await this.addMemberSQL(member);
       case DB_PROVIDERS.MONGODB:
         return await this.addMemberMongo(member);
       default:
@@ -256,28 +256,48 @@ class DatabaseAdapter {
 
   // SQL implementations
   async addMemberSQL(member) {
-    const sql = `
-      INSERT INTO members (name, email, phone, blood_group, department, year, motivation, experience, interests)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const params = [
-      member.name,
-      member.email,
-      member.phone,
-      member.bloodGroup,
-      member.department,
-      member.year,
-      member.motivation,
-      member.experience,
-      member.interests,
-    ];
+    let sql, params;
 
     if (this.type === DB_PROVIDERS.SQLITE) {
+      sql = `
+        INSERT INTO members (name, email, phone, blood_group, department, year, motivation, experience, interests)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      params = [
+        member.name,
+        member.email,
+        member.phone,
+        member.bloodGroup,
+        member.department,
+        member.year,
+        member.motivation,
+        member.experience,
+        member.interests,
+      ];
+
       const result = await this.connection.run(sql, params);
       return { id: result.lastID, ...member };
     } else {
+      // PostgreSQL syntax
+      sql = `
+        INSERT INTO members (name, email, phone, blood_group, department, year, motivation, experience, interests)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+      `;
+      params = [
+        member.name,
+        member.email,
+        member.phone,
+        member.bloodGroup,
+        member.department,
+        member.year,
+        member.motivation,
+        member.experience,
+        member.interests,
+      ];
+
       const client = await this.connection.connect();
-      const result = await client.query(sql + " RETURNING *", params);
+      const result = await client.query(sql, params);
       client.release();
       return result.rows[0];
     }

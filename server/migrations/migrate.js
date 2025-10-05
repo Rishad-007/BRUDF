@@ -3,11 +3,15 @@
  * Migrates data from SQLite to external databases (PostgreSQL, MongoDB, Supabase)
  */
 
+import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { getDatabaseConfig, DB_PROVIDERS } from "../databaseConfig.js";
 import DatabaseAdapter from "../databaseAdapter.js";
+
+// Load environment variables
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

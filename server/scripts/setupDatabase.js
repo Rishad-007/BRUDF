@@ -3,8 +3,12 @@
  * Initializes and configures database based on environment
  */
 
+import dotenv from "dotenv";
 import { getDatabaseConfig, DB_PROVIDERS } from "../databaseConfig.js";
 import DatabaseAdapter from "../databaseAdapter.js";
+
+// Load environment variables
+dotenv.config();
 
 async function setupDatabase() {
   console.log("🚀 Setting up BRUDF Database...");
