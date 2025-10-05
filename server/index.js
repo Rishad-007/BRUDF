@@ -11,8 +11,7 @@ import {
   deleteMember,
   closeDatabase,
   createDatabaseBackup,
-  createCSVBackup,
-} from "./database.js";
+} from "./databaseAdapter.js";
 import {
   getCombinedMemberData,
   exportAllDataToCSV,
@@ -479,9 +478,6 @@ async function performShutdownBackup() {
 
     // Create database backup
     await createDatabaseBackup();
-
-    // Create CSV backup
-    await createCSVBackup();
 
     // Stop auto-backup
     persistenceManager.stopAutoBackup();

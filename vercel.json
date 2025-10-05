@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "name": "brudf-website",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["server/**", "dist/**", "public/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/dist/index.html"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "DB_PROVIDER": "supabase",
+    "BACKUP_ENABLED": "true",
+    "BACKUP_INTERVAL_HOURS": "6",
+    "BACKUP_RETENTION_DAYS": "30",
+    "RATE_LIMIT_WINDOW_MS": "900000",
+    "RATE_LIMIT_MAX_REQUESTS": "50"
+  },
+  "functions": {
+    "server/index.js": {
+      "includeFiles": "server/**"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/server/index.js"
+    }
+  ]
+}

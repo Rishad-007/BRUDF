@@ -7,25 +7,107 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      # Database Configuration
+      - key: DB_PROVIDER
+        value: supabase # Change to: sqlite, postgresql, mongodb, or supabase
+
+      # Supabase Configuration (Recommended for production)
+      - key: SUPABASE_URL
+        fromService:
+          type: supabase
+          name: brudf-database
+          property: connectionString
+      - key: SUPABASE_ANON_KEY
+        fromService:
+          type: supabase
+          name: brudf-database
+          property: anonKey
+      - key: SUPABASE_SERVICE_KEY
+        fromService:
+          type: supabase
+          name: brudf-database
+          property: serviceKey
+      - key: SUPABASE_HOST
+        fromService:
+          type: supabase
+          name: brudf-database
+          property: host
+      - key: SUPABASE_PASSWORD
+        fromService:
+          type: supabase
+          name: brudf-database
+          property: password
+
+      # Alternative: Regular PostgreSQL
+      # - key: POSTGRES_HOST
+      #   fromService:
+      #     type: postgres
+      #     name: brudf-postgres
+      #     property: host
+      # - key: POSTGRES_PORT
+      #   fromService:
+      #     type: postgres
+      #     name: brudf-postgres
+      #     property: port
+      # - key: POSTGRES_DB
+      #   fromService:
+      #     type: postgres
+      #     name: brudf-postgres
+      #     property: database
+      # - key: POSTGRES_USER
+      #   fromService:
+      #     type: postgres
+      #     name: brudf-postgres
+      #     property: user
+      # - key: POSTGRES_PASSWORD
+      #   fromService:
+      #     type: postgres
+      #     name: brudf-postgres
+      #     property: password
+
+      # Security Configuration
+      - key: DB_ENCRYPTION_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+
+      # Application Configuration
       - key: ADMIN_PASSWORD
         value: brudf2024admin
       - key: BACKUP_ENABLED
         value: "true"
-      - key: AUTO_BACKUP_INTERVAL
-        value: "1800000" # 30 minutes
-    # Persistent disk for multi-layer data storage
+      - key: BACKUP_INTERVAL_HOURS
+        value: "6"
+      - key: BACKUP_RETENTION_DAYS
+        value: "30"
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000" # 15 minutes
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "50"
+
+      # CORS Configuration
+      - key: CORS_ORIGIN
+        value: https://brudf-website.onrender.com
+
+    # Optional: Keep persistent disk for local backups (SQLite fallback)
     disk:
-      name: brudf-persistent-storage
+      name: brudf-backup-storage
       mountPath: /opt/render/project/src/server/data
-      sizeGB: 2 # Increased for multiple backups and redundancy
-  - type: web
-    name: brudf-website
-    env: node
-    buildCommand: npm run render-build
-    startCommand: npm start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: ADMIN_PASSWORD
-        value: brudf2024admin
+      sizeGB: 1 # Reduced since external DB is primary
+
     autoDeploy: true
+# Optional: Add external database services
+# Uncomment the section you want to use:
+
+# For PostgreSQL:
+# databases:
+#   - name: brudf-postgres
+#     databaseName: brudf_production
+#     user: brudf_user
+#     region: ohio
+
+# For Supabase (managed externally - just reference):
+# Note: Supabase is managed externally, configure through their dashboard
+# and update the environment variables above with your project details
